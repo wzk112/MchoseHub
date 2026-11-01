@@ -76,7 +76,8 @@ public struct KeyboardSchema: Sendable {
     }
     return KeyboardSchema(
       model: model, commands: commands, board: layout.board, diyPre: Data(layout.diyPre),
-      keyWriteCommon: layout.keyWriteCommon.mapValues(Data.init), reservedKeys: layout.reservedKeys)
+      keyWriteCommon: layout.keyWriteCommon.mapValues { Data($0) },
+      reservedKeys: layout.reservedKeys)
   }
   public static func availableModels() throws -> [String] {
     let root = try resource.get()

@@ -6,7 +6,7 @@ import UniformTypeIdentifiers
 
 extension AppModel {
   func diagnostic(name: String? = nil, hex: String = "") {
-    guard let selection, !busy else { return }
+    guard let selection, !busy, !recording else { return }
     var payload = Data()
     if name == nil {
       do {
@@ -47,15 +47,18 @@ extension AppModel {
           "\(name ?? "raw") RX \(response.count) bytes: "
             + response.map { String(format: "%02X", $0) }.joined(separator: " "))
         if name == nil {
-          profile = nil
           captured = nil
           uploadedMacros = nil
+          uploadedOwner = nil
+          message = "报文已发送；设备状态需重新读取验证，当前草稿仍可导出。"
         }
       } catch {
         guard current == generation else { return }
         errorMessage = error.localizedDescription
-        profile = nil
         captured = nil
+        uploadedMacros = nil
+        uploadedOwner = nil
+        message = "诊断请求失败；设备状态需重新读取验证，当前草稿仍可导出。"
       }
       if current == generation { busy = false }
     }
@@ -72,29 +75,43 @@ extension AppModel {
     }
   }
   func saveNamedProfile() {
+    guard !busy, !recording else { return }
     do {
       if let profile {
         try library.save(name: profileName, profile: profile)
+        savedProfile = profile
         refreshLibrary()
         message = "已保存本地配置：\(profileName)"
       }
     } catch { errorMessage = error.localizedDescription }
   }
   func loadNamedProfile(_ name: String) {
+    guard !busy, !recording, confirmDiscard() else { return }
     do {
       profile = try library.load(model: schema?.model ?? "K87", name: name)
+      savedProfile = profile
+      selectedKey = nil
       profileName = name
       message = "已载入 \(name)，尚未应用到设备。"
     } catch { errorMessage = error.localizedDescription }
   }
   func deleteNamedProfile(_ name: String) {
+    guard !busy, !recording else { return }
+    let alert = NSAlert()
+    alert.messageText = "删除本地配置“\(name)”？"
+    alert.informativeText = "当前草稿和设备设置不受影响。"
+    alert.addButton(withTitle: "取消")
+    alert.addButton(withTitle: "删除配置")
+    guard alert.runModal() == .alertSecondButtonReturn else { return }
     do {
       try library.delete(model: schema?.model ?? "K87", name: name)
       refreshLibrary()
     } catch { errorMessage = error.localizedDescription }
   }
   func confirmApply() {
-    guard let selection, let target = profile, !busy else { return }
+    guard let selection, let target = profile, let baseline = captured?.profile, canEdit else {
+      return
+    }
     let alert = NSAlert()
     alert.messageText = "应用当前配置到键盘？"
     alert.informativeText = "将先读取并保存当前完整配置，再写入已改变的配置块并回读比对。失败会停止；宏库不包含在配置备份中。"
@@ -103,7 +120,6 @@ extension AppModel {
     guard alert.runModal() == .alertFirstButtonReturn else { return }
     let current = generation
     let token = token
-    let baseline = captured?.profile
     busy = true
     Task {
       do {
@@ -122,24 +138,25 @@ extension AppModel {
       } catch {
         guard current == generation else { return }
         busy = false
-        profile = nil
         captured = nil
         uploadedMacros = nil
         errorMessage = error.localizedDescription
-        message = "操作失败，已清除旧配置缓存。请重新读取。"
+        message = "操作失败，设备会话未验证；草稿仍可导出。请重新读取设备后再应用。"
         log.append(error.localizedDescription)
       }
     }
   }
   func factoryDraft() {
+    guard canEdit, confirmDiscard() else { return }
     do {
       if let schema {
         try profile?.restoreFactory(schema: schema)
-        message = "已生成默认配置草稿，保留保留槽。点击应用后才写入设备。"
+        message = "已生成默认配置草稿，保留固件保留槽。点击应用后才写入设备。"
       }
     } catch { errorMessage = error.localizedDescription }
   }
   func repairDraft() {
+    guard canEdit else { return }
     do {
       if let schema {
         try profile?.repairLighting(schema: schema)
@@ -148,7 +165,7 @@ extension AppModel {
     } catch { errorMessage = error.localizedDescription }
   }
   func uploadMacroLibrary() {
-    guard let selection, let catalog, !busy else { return }
+    guard let selection, let catalog, !busy, !recording else { return }
     do { _ = try MacroCodec.bank(macros, catalog: catalog) } catch {
       errorMessage = error.localizedDescription
       return
@@ -175,14 +192,17 @@ extension AppModel {
         guard current == generation else { return }
         errorMessage = error.localizedDescription
         uploadedMacros = nil
-        profile = nil
+        uploadedOwner = nil
         captured = nil
+        message = "宏上传未完成；设备状态需重新读取验证，当前配置草稿仍可导出。"
       }
       if current == generation { busy = false }
     }
   }
   var canBindMacro: Bool {
     !busy && !recording && selectedKey != nil && profile != nil
+      && macros.indices.contains(macroIndex)
+      && schema?.reservedKeys.contains(selectedKey ?? "") == false
       && (selection == nil || (uploadedOwner == selection && uploadedMacros == macros))
   }
   func bindSelectedMacro() {
@@ -197,7 +217,15 @@ extension AppModel {
   }
   func macroFile(save: Bool) {
     do {
-      guard let catalog else { return }
+      guard let catalog, !busy, !recording else { return }
+      if !save && hasUnsavedMacros {
+        let alert = NSAlert()
+        alert.messageText = "替换当前宏库？"
+        alert.informativeText = "当前宏库有未保存的修改，可以取消并先另存宏文件。"
+        alert.addButton(withTitle: "取消")
+        alert.addButton(withTitle: "继续导入")
+        guard alert.runModal() == .alertSecondButtonReturn else { return }
+      }
       if save {
         _ = try MacroCodec.bank(macros, catalog: catalog)
         let panel = NSSavePanel()
@@ -207,6 +235,7 @@ extension AppModel {
           let encoder = JSONEncoder()
           encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
           try encoder.encode(macros).write(to: url, options: .atomic)
+          savedMacros = macros
         }
       } else {
         let panel = NSOpenPanel()
@@ -217,6 +246,7 @@ extension AppModel {
           let values = try JSONDecoder().decode([KeyboardMacro].self, from: data)
           _ = try MacroCodec.bank(values, catalog: catalog)
           macros = values
+          savedMacros = values
           macroIndex = 0
         }
       }
@@ -230,7 +260,7 @@ extension AppModel {
     } catch { return error.localizedDescription }
   }
   func changeColor(_ color: Color, fill: Bool = false, perKey: Bool = false) {
-    guard let schema, let color = NSColor(color).usingColorSpace(.sRGB) else { return }
+    guard canEdit, let schema, let color = NSColor(color).usingColorSpace(.sRGB) else { return }
     let rgb = [color.redComponent, color.greenComponent, color.blueComponent].map {
       UInt8(max(0, min(255, ($0 * 255).rounded())))
     }
@@ -242,12 +272,14 @@ extension AppModel {
 
 struct FeaturePanels: View {
   @Bindable var model: AppModel
-  @State var color = Color(red: 1, green: 0, blue: 0.7)
-  @State var manualKey = "a"
-  @State var manualDown = true
-  @State var manualMouse = false
-  @State var manualDelay = 50
-  @State var rawHex = "87 00 00 01 00 02 00"
+  @State private var color = Color.white
+  @State private var manualKey = "a"
+  @State private var manualDown = true
+  @State private var manualMouse = false
+  @State private var manualDelay = 50
+  @State private var rawHex = "87 00 00 01 00 02 00"
+  @State private var selectedProfile: String?
+
   var body: some View {
     Group {
       switch model.page {
@@ -258,295 +290,614 @@ struct FeaturePanels: View {
       default: diagnostics
       }
     }
+    .textFieldStyle(.roundedBorder)
+    .buttonStyle(.bordered)
+    .disabled(model.busy)
   }
-  var lighting: some View {
-    VStack(alignment: .leading, spacing: 18) {
+
+  private var lighting: some View {
+    VStack(alignment: .leading, spacing: 24) {
       if let schema = model.schema {
-        Picker(
-          "灯效",
-          selection: Binding(
-            get: { model.number("lightMode") },
-            set: { value in
-              do { try model.profile?.setEffect(value, schema: schema) } catch {
-                model.errorMessage = error.localizedDescription
+        let mode = model.number("lightMode")
+        let effect = KeyboardEffect.all(schema: schema).first { $0.id == mode }
+        HubSection("灯光效果") {
+          Grid(alignment: .leading, horizontalSpacing: 24, verticalSpacing: 16) {
+            GridRow {
+              fieldLabel("效果")
+              Picker(
+                "灯光效果",
+                selection: Binding(
+                  get: { model.number("lightMode") },
+                  set: { value in
+                    guard model.canEdit else { return }
+                    do { try model.profile?.setEffect(value, schema: schema) } catch {
+                      model.errorMessage = error.localizedDescription
+                    }
+                  })
+              ) {
+                ForEach(KeyboardEffect.all(schema: schema)) { Text($0.name).tag($0.id) }
+              }.labelsHidden().frame(maxWidth: 280)
+            }
+            GridRow {
+              fieldLabel("参数")
+              HStack(alignment: .top, spacing: 28) {
+                lightSlider(
+                  "亮度", key: "brightness\(mode)", range: 0...100,
+                  suffix: "%", disabled: effect?.brightnessDisabled ?? true)
+                lightSlider(
+                  "速度", key: "speed\(mode)", range: 0...4,
+                  suffix: "", disabled: effect?.speedDisabled ?? true)
+              }.frame(maxWidth: .infinity)
+            }
+            if model.profile?.performance.numbers["multiColor\(mode)"] != nil,
+              effect?.colorDisabled == false
+            {
+              GridRow {
+                fieldLabel("色彩")
+                Toggle(
+                  "多彩模式",
+                  isOn: Binding(
+                    get: { model.number("multiColor\(mode)") == 7 },
+                    set: { model.setNumber("multiColor\(mode)", $0 ? 7 : 0) })
+                )
+                .toggleStyle(.checkbox)
               }
-            })
-        ) {
-          ForEach(KeyboardEffect.all(schema: schema)) { Text($0.name).tag($0.id) }
-        }.disabled(!model.canEdit)
-        let effect = KeyboardEffect.all(schema: schema).first { $0.id == model.number("lightMode") }
-        slider(
-          "亮度", key: "brightness\(model.number("lightMode"))", range: 0...100,
-          disabled: effect?.brightnessDisabled ?? true)
-        slider(
-          "速度", key: "speed\(model.number("lightMode"))", range: 0...4,
-          disabled: effect?.speedDisabled ?? true)
-        Toggle(
-          "多彩",
-          isOn: Binding(
-            get: { model.number("multiColor\(model.number("lightMode"))") == 7 },
-            set: { model.setNumber("multiColor\(model.number("lightMode"))", $0 ? 7 : 0) })
-        ).disabled(!model.canEdit || effect?.colorDisabled == true)
-        ColorPicker("颜色", selection: $color, supportsOpacity: false)
-        if model.number("lightMode") == schema.customLightMode {
-          KeyboardDiagram(keys: schema.board, selected: model.selectedKey, colors: diyColors) {
-            model.selectedKey = $0
-          }.frame(height: 285)
-          Text("在键盘图上选择目标键，再为该键设置颜色。")
-          HStack {
-            Button("设置所选键颜色（\(model.selectedKey ?? "未选择")）") {
-              model.changeColor(color, perKey: true)
-            }.disabled(model.selectedKey == nil || !model.canEdit)
-            Button("填充全部 LED") { model.changeColor(color, fill: true) }.disabled(!model.canEdit)
-          }
-        } else {
-          Button("设置当前灯效颜色") { model.changeColor(color) }.disabled(
-            !model.canEdit || effect?.colorDisabled == true)
+            }
+          }.disabled(!model.canEdit)
         }
-        Button("生成灯效参数修复草稿") { model.repairDraft() }.disabled(
-          !model.canEdit || schema.model != "K87")
-        Button("生成强制点亮草稿") {
-          do {
-            try model.profile?.setEffect(1, schema: schema)
-            model.setNumber("brightness1", 100)
-            model.setNumber("speed1", 0)
-            try model.profile?.setColor([255, 255, 255], schema: schema)
-          } catch { model.errorMessage = error.localizedDescription }
-        }.disabled(!model.canEdit)
+
+        if mode == schema.customLightMode {
+          HubSection("逐键颜色") {
+            KeyboardDiagram(keys: schema.board, selected: model.selectedKey, colors: diyColors) {
+              model.selectedKey = $0
+            }.frame(height: 250).disabled(!model.canEdit)
+            HStack(spacing: 12) {
+              ColorPicker("颜色", selection: $color, supportsOpacity: false)
+                .fixedSize().disabled(!model.canEdit)
+              Text(model.selectedKey.map { "所选：\($0)" } ?? "请选择一个按键")
+                .font(.callout).foregroundStyle(.secondary)
+              Spacer(minLength: 12)
+              Button("设置所选键") { model.changeColor(color, perKey: true) }
+                .disabled(model.selectedKey == nil || !model.canEdit)
+              Button("填充全部") { model.changeColor(color, fill: true) }
+                .disabled(!model.canEdit)
+            }
+          }
+        } else if effect?.colorDisabled == false {
+          HubSection("灯效颜色") {
+            HStack(spacing: 16) {
+              ColorPicker("颜色", selection: $color, supportsOpacity: false).fixedSize()
+              Button("设置颜色") { model.changeColor(color) }
+              Spacer()
+            }.disabled(!model.canEdit)
+          }
+        }
+
+        DisclosureGroup("修复与强制点亮") {
+          VStack(alignment: .leading, spacing: 10) {
+            Text("生成可检查的草稿，应用后才会更改设备。")
+              .font(.caption).foregroundStyle(.secondary)
+            HStack(spacing: 10) {
+              Button("修复 K87 灯效参数") { model.repairDraft() }
+                .disabled(!model.canEdit || schema.model != "K87")
+              Button("生成白光常亮草稿") {
+                guard model.canEdit else { return }
+                do {
+                  try model.profile?.setEffect(1, schema: schema)
+                  model.setNumber("brightness1", 100)
+                  model.setNumber("speed1", 0)
+                  try model.profile?.setColor([255, 255, 255], schema: schema)
+                } catch { model.errorMessage = error.localizedDescription }
+              }.disabled(!model.canEdit)
+            }
+          }.padding(.top, 8)
+        }.font(.callout)
       }
-    }.padding(12)
+    }
+    .onAppear { syncColor() }
+    .onChange(of: model.number("lightMode")) { syncColor() }
+    .onChange(of: model.selectedKey) { syncColor() }
+    .onChange(of: model.generation) { syncColor() }
+    .onChange(of: model.profile?.lighting) { syncColor() }
+    .onChange(of: model.profile?.diy) { syncColor() }
   }
-  var diyColors: [String: Color] {
+
+  private func lightSlider(
+    _ title: String, key: String, range: ClosedRange<Double>, suffix: String, disabled: Bool
+  ) -> some View {
+    VStack(alignment: .leading, spacing: 8) {
+      HStack {
+        Text(title)
+        Spacer()
+        Text(disabled ? "—" : "\(model.number(key))\(suffix)")
+          .monospacedDigit().foregroundStyle(.secondary)
+      }.font(.callout)
+      Slider(
+        value: Binding(
+          get: { Double(model.number(key)) },
+          set: { model.setNumber(key, Int($0.rounded())) }), in: range
+      )
+      .accessibilityLabel(title)
+      .disabled(!model.canEdit || disabled || model.profile?.performance.numbers[key] == nil)
+    }.frame(maxWidth: .infinity)
+  }
+
+  private var diyColors: [String: Color] {
     guard let schema = model.schema, let profile = model.profile,
       let red = profile.diy.buffers["rTable"], let green = profile.diy.buffers["gTable"],
       let blue = profile.diy.buffers["bTable"]
     else { return [:] }
     var result: [String: Color] = [:]
-    for (i, key) in schema.keyList.enumerated()
-    where i < red.count && i < green.count && i < blue.count {
+    for (index, key) in schema.keyList.enumerated()
+    where index < red.count && index < green.count && index < blue.count {
       result[key.n] = Color(
-        red: Double(red[i]) / 255, green: Double(green[i]) / 255, blue: Double(blue[i]) / 255)
+        red: Double(red[index]) / 255,
+        green: Double(green[index]) / 255, blue: Double(blue[index]) / 255)
     }
     return result
   }
-  func slider(_ title: String, key: String, range: ClosedRange<Double>, disabled: Bool = false)
-    -> some View
-  {
-    VStack(alignment: .leading) {
-      Text("\(title)：\(model.number(key))")
-      Slider(
-        value: Binding(
-          get: { Double(model.number(key)) }, set: { model.setNumber(key, Int($0.rounded())) }),
-        in: range, step: 1
-      )
-      .disabled(!model.canEdit || disabled || model.profile?.performance.numbers[key] == nil)
+
+  private func syncColor() {
+    if model.number("lightMode") == model.schema?.customLightMode {
+      color = model.selectedKey.flatMap { diyColors[$0] } ?? .white
+    } else if let bytes = model.profile?.lighting.buffers[
+      "lightModeColor\(model.number("lightMode"))"],
+      bytes.count == 3
+    {
+      color = Color(
+        red: Double(bytes[0]) / 255, green: Double(bytes[1]) / 255,
+        blue: Double(bytes[2]) / 255)
+    } else {
+      color = .white
     }
   }
-  var performance: some View {
-    Form {
-      if model.profile?.performance.numbers["rateVal"] != nil {
-        Picker(
-          "回报率",
-          selection: Binding(
-            get: { model.number("rateVal") }, set: { model.setNumber("rateVal", $0) })
-        ) {
-          Text("250 Hz").tag(1)
-          Text("500 Hz").tag(2)
-          Text("1000 Hz").tag(3)
-        }
+
+  private var performance: some View {
+    ViewThatFits(in: .horizontal) {
+      HStack(alignment: .top, spacing: 32) {
+        connectionSettings.frame(minWidth: 280, maxWidth: .infinity, alignment: .topLeading)
+        systemKeySettings.frame(minWidth: 240, maxWidth: .infinity, alignment: .topLeading)
       }
-      Picker(
-        "休眠",
-        selection: Binding(
-          get: { model.number("sleepTimeVal") / 2 },
-          set: { model.setNumber("sleepTimeVal", $0 * 2) })
-      ) {
-        ForEach([0, 1, 2, 3, 5, 10, 15, 30], id: \.self) {
-          Text($0 == 0 ? "不休眠" : "\($0) 分钟").tag($0)
-        }
+      VStack(alignment: .leading, spacing: 24) {
+        connectionSettings
+        systemKeySettings
       }
-      if let schema = model.schema {
-        Picker(
-          "延迟模式",
-          selection: Binding(
-            get: {
-              model.number("latencySwitch") == 0
-                ? 0 : schema.model == "Z75" && model.number("latencySwitch") == 1 ? 1 : 2
-            },
-            set: { value in
-              do { try model.profile?.setLatency(value, schema: schema) } catch {
-                model.errorMessage = error.localizedDescription
-              }
-            })
-        ) {
-          Text("速度模式").tag(0)
-          if schema.model == "Z75" { Text("标准低延迟").tag(1) }
-          Text("标准模式").tag(2)
-        }
-        Toggle(
-          "Mac 模式",
-          isOn: Binding(
-            get: { model.number("macSwitch") == schema.macSwitchOn },
-            set: { on in
-              model.setNumber("macSwitch", on ? schema.macSwitchOn : 0)
-              if on { model.setNumber("winKeySwitch", 0) }
-            }))
-        Toggle(
-          "锁定 Win 键",
-          isOn: Binding(
-            get: { model.number("winKeySwitch") == 1 },
-            set: { model.setNumber("winKeySwitch", $0 ? 1 : 0) })
-        ).disabled(model.number("macSwitch") == schema.macSwitchOn)
-      }
-    }.formStyle(.grouped).disabled(!model.canEdit)
+    }.disabled(!model.canEdit)
   }
-  var macroEditor: some View {
-    VStack(alignment: .leading, spacing: 14) {
-      Text(model.macroStatus).font(.caption).foregroundStyle(.secondary)
-      HStack {
-        Picker("宏", selection: $model.macroIndex) {
-          ForEach(model.macros.indices, id: \.self) { Text(model.macros[$0].name).tag($0) }
-        }
-        Button("新建") {
-          model.macros.append(
-            KeyboardMacro(
-              name: "宏 \(UUID().uuidString.prefix(6))",
-              steps: [MacroStep(key: "a", down: true), MacroStep(key: "a", down: false)]))
-          model.macroIndex = model.macros.count - 1
-        }
-        Button("删除") {
-          if model.macros.indices.contains(model.macroIndex) {
-            model.macros.remove(at: model.macroIndex)
-            model.macroIndex = max(0, model.macroIndex - 1)
+
+  private var connectionSettings: some View {
+    HubSection("连接与响应") {
+      Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 18) {
+        if model.profile?.performance.numbers["rateVal"] != nil {
+          GridRow {
+            fieldLabel("回报率")
+            Picker(
+              "回报率",
+              selection: Binding(
+                get: { model.number("rateVal") }, set: { model.setNumber("rateVal", $0) })
+            ) {
+              Text("250 Hz").tag(1)
+              Text("500 Hz").tag(2)
+              Text("1000 Hz").tag(3)
+            }.labelsHidden().frame(minWidth: 150, idealWidth: 190, maxWidth: 240)
           }
         }
+        if let schema = model.schema {
+          GridRow {
+            fieldLabel("延迟模式")
+            Picker(
+              "延迟模式",
+              selection: Binding(
+                get: {
+                  model.number("latencySwitch") == 0
+                    ? 0
+                    : schema.model == "Z75" && model.number("latencySwitch") == 1 ? 1 : 2
+                },
+                set: { value in
+                  guard model.canEdit else { return }
+                  do { try model.profile?.setLatency(value, schema: schema) } catch {
+                    model.errorMessage = error.localizedDescription
+                  }
+                })
+            ) {
+              Text("速度模式").tag(0)
+              if schema.model == "Z75" { Text("标准低延迟").tag(1) }
+              Text("标准模式").tag(2)
+            }.labelsHidden().frame(minWidth: 150, idealWidth: 190, maxWidth: 240)
+          }
+        }
+        GridRow {
+          fieldLabel("自动休眠")
+          Picker(
+            "自动休眠",
+            selection: Binding(
+              get: { model.number("sleepTimeVal") }, set: { model.setNumber("sleepTimeVal", $0) })
+          ) {
+            ForEach(
+              Array(Set([0, 2, 4, 6, 10, 20, 30, 60, model.number("sleepTimeVal")])).sorted(),
+              id: \.self
+            ) {
+              Text($0 == 0 ? "不休眠" : "\(Double($0) / 2, specifier: "%g") 分钟").tag($0)
+            }
+          }.labelsHidden().frame(minWidth: 150, idealWidth: 190, maxWidth: 240)
+        }
       }
+    }
+  }
+
+  @ViewBuilder private var systemKeySettings: some View {
+    if let schema = model.schema {
+      HubSection("系统按键") {
+        VStack(alignment: .leading, spacing: 16) {
+          Toggle(
+            "Mac 模式",
+            isOn: Binding(
+              get: { model.number("macSwitch") == schema.macSwitchOn },
+              set: { on in
+                model.setNumber("macSwitch", on ? schema.macSwitchOn : 0)
+                if on { model.setNumber("winKeySwitch", 0) }
+              }))
+          Toggle(
+            "锁定 Win 键",
+            isOn: Binding(
+              get: { model.number("winKeySwitch") == 1 },
+              set: { model.setNumber("winKeySwitch", $0 ? 1 : 0) })
+          )
+          .disabled(model.number("macSwitch") == schema.macSwitchOn)
+          Text("Mac 模式下不启用 Win 键锁定。")
+            .font(.caption).foregroundStyle(.secondary)
+        }.toggleStyle(.checkbox)
+      }
+    }
+  }
+
+  private var macroEditor: some View {
+    VStack(alignment: .leading, spacing: 20) {
+      HStack(spacing: 8) {
+        Picker("当前宏", selection: $model.macroIndex) {
+          if model.macros.isEmpty { Text("没有宏").tag(0) }
+          ForEach(model.macros.indices, id: \.self) { Text(model.macros[$0].name).tag($0) }
+        }.frame(maxWidth: 310).disabled(model.recording || model.macros.isEmpty)
+        Button("新建", systemImage: "plus") { addMacro() }.disabled(model.recording)
+        Button("删除", systemImage: "minus") { deleteMacro() }
+          .disabled(model.recording || !model.macros.indices.contains(model.macroIndex))
+        Spacer()
+        if model.hasUnsavedMacros {
+          Label("未保存", systemImage: "circle.fill").font(.caption).foregroundStyle(.secondary)
+        }
+      }
+
       if model.macros.indices.contains(model.macroIndex) {
         let index = model.macroIndex
-        TextField("名称", text: $model.macros[index].name)
-        Picker("触发方式", selection: $model.macros[index].trigger) {
-          Text("按住").tag(MacroTrigger.hold)
-          Text("切换").tag(MacroTrigger.toggle)
-          Text("一次").tag(MacroTrigger.once)
-        }
-        ScrollView {
-          LazyVStack(alignment: .leading) {
-            ForEach(model.macros[index].steps.indices, id: \.self) { i in
-              HStack {
-                Text("\(i+1)").frame(width: 35)
-                TextField("键", text: $model.macros[index].steps[i].key).frame(width: 110)
-                Toggle("按下", isOn: $model.macros[index].steps[i].down).toggleStyle(.checkbox)
-                Toggle("鼠标", isOn: $model.macros[index].steps[i].mouse).toggleStyle(.checkbox)
-                TextField("延时 ms", value: $model.macros[index].steps[i].delayMs, format: .number)
-                  .frame(width: 80)
-                Button("移除", systemImage: "minus.circle") {
-                  model.macros[index].steps.remove(at: i)
-                }.labelStyle(.iconOnly)
+        let steps = model.macros[index].steps
+        Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 12) {
+          GridRow {
+            fieldLabel("名称")
+            TextField("宏名称", text: macroBinding(index, \.name, fallback: ""))
+              .frame(maxWidth: 420)
+          }
+          GridRow {
+            fieldLabel("触发方式")
+            Picker("触发方式", selection: macroBinding(index, \.trigger, fallback: .once)) {
+              Text("按住").tag(MacroTrigger.hold)
+              Text("切换").tag(MacroTrigger.toggle)
+              Text("一次").tag(MacroTrigger.once)
+            }.labelsHidden().pickerStyle(.segmented).frame(maxWidth: 300)
+          }
+        }.disabled(model.recording)
+
+        HubSection("事件序列") {
+          VStack(spacing: 0) {
+            macroColumns
+              .padding(.horizontal, 12).padding(.vertical, 8)
+              .background(Color(nsColor: .controlBackgroundColor))
+            Divider()
+            ScrollView {
+              LazyVStack(spacing: 0) {
+                ForEach(steps.indices, id: \.self) { step in
+                  macroRow(macro: index, step: step)
+                    .padding(.horizontal, 12).padding(.vertical, 5)
+                  if step + 1 < steps.count { Divider() }
+                }
+                if steps.isEmpty {
+                  Text("还没有事件。添加一项，或开始录制。")
+                    .foregroundStyle(.secondary).padding(20)
+                }
               }
+            }.frame(height: min(192, max(74, CGFloat(steps.count) * 37)))
+          }
+          .background(Color(nsColor: .textBackgroundColor))
+          .clipShape(RoundedRectangle(cornerRadius: 6))
+          .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(.separator.opacity(0.5)))
+          .disabled(model.recording)
+
+          HStack(spacing: 12) {
+            TextField("键名", text: $manualKey).frame(minWidth: 90, maxWidth: .infinity)
+            Toggle("按下", isOn: $manualDown).toggleStyle(.checkbox).frame(width: 62)
+            Toggle("鼠标", isOn: $manualMouse).toggleStyle(.checkbox).frame(width: 62)
+            HStack(spacing: 4) {
+              TextField("延时", value: $manualDelay, format: .number).frame(width: 64)
+              Text("ms").foregroundStyle(.secondary)
             }
-          }
-        }.frame(minHeight: 140, maxHeight: 250)
-        HStack {
-          TextField("事件键", text: $manualKey).frame(width: 100)
-          Toggle("按下", isOn: $manualDown).toggleStyle(.checkbox)
-          Toggle("鼠标", isOn: $manualMouse).toggleStyle(.checkbox)
-          TextField("延时 ms", value: $manualDelay, format: .number).frame(width: 80)
-          Button("添加事件") {
-            model.macros[index].steps.append(
-              MacroStep(key: manualKey, down: manualDown, delayMs: manualDelay, mouse: manualMouse))
-          }
+            Button("添加事件", systemImage: "plus") {
+              guard model.macros.indices.contains(index) else { return }
+              model.macros[index].steps.append(
+                MacroStep(
+                  key: manualKey, down: manualDown,
+                  delayMs: manualDelay, mouse: manualMouse))
+            }.disabled(manualKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+          }.disabled(model.recording)
         }
-        HStack {
-          Button(model.recording ? "停止录制" : "开始录制") { model.recording.toggle() }
-          Text("录制仅在下方区域有焦点时捕获；离开时补齐释放事件。").font(.caption)
-        }
-        MacroRecorder(recording: $model.recording) { steps in
-          if !steps.isEmpty {
-            model.macros.append(
-              KeyboardMacro(name: "录制 \(UUID().uuidString.prefix(6))", steps: steps))
-            model.macroIndex = model.macros.count - 1
+
+        VStack(alignment: .leading, spacing: 8) {
+          HStack(spacing: 12) {
+            Button(
+              model.recording ? "停止录制" : "开始录制",
+              systemImage: model.recording ? "stop.circle" : "record.circle"
+            ) { model.recording.toggle() }
+            Text("在下方区域输入；离开区域会结束录制。")
+              .font(.caption).foregroundStyle(.secondary)
           }
-        }.frame(height: 75)
+          MacroRecorder(recording: $model.recording) { steps in
+            if !steps.isEmpty {
+              model.macros.append(
+                KeyboardMacro(name: "录制 \(UUID().uuidString.prefix(6))", steps: steps))
+              model.macroIndex = model.macros.count - 1
+            }
+          }.frame(height: 48)
+        }
+      } else {
+        ContentUnavailableView(
+          "新建一个宏", systemImage: "record.circle",
+          description: Text("添加键盘、鼠标事件，或录制输入序列。")
+        )
+        .frame(height: 180)
       }
-      HStack {
+
+      Divider()
+      HStack(spacing: 10) {
+        Button("导入…") { model.macroFile(save: false) }
         Button("另存宏库…") { model.macroFile(save: true) }
-        Button("导入宏库…") { model.macroFile(save: false) }
-        Button("上传完整宏库…") { model.uploadMacroLibrary() }.disabled(
-          model.selection == nil || model.busy || model.recording)
-        Button("绑定到所选按键") { model.bindSelectedMacro() }.disabled(!model.canBindMacro)
-      }
-      Text("修改宏后需重新上传才能在设备上绑定。配置备份不包含完整宏库。").font(.caption).foregroundStyle(.secondary)
-    }
-    .onDisappear { model.recording = false }
+        Spacer()
+        Button("绑定所选按键") { model.bindSelectedMacro() }.disabled(!model.canBindMacro)
+        Button("上传宏库…") { model.uploadMacroLibrary() }
+          .disabled(model.selection == nil || model.recording)
+      }.disabled(model.recording)
+      Text(model.macroStatus).font(.caption).foregroundStyle(.secondary)
+      Text("上传将覆盖设备宏库，配置备份不含宏。修改宏后需重新上传，再绑定到按键。")
+        .font(.caption).foregroundStyle(.secondary)
+    }.onDisappear { model.recording = false }
   }
-  var profiles: some View {
-    VStack(alignment: .leading, spacing: 15) {
-      HStack {
-        TextField("配置名称", text: $model.profileName)
-        Button("保存当前草稿") { model.saveNamedProfile() }.disabled(model.profile == nil)
+
+  private var macroColumns: some View {
+    HStack(spacing: 12) {
+      Text("#").frame(width: 24)
+      Text("键名").frame(minWidth: 90, maxWidth: .infinity, alignment: .leading)
+      Text("按下").frame(width: 42)
+      Text("鼠标").frame(width: 42)
+      Text("延时 · ms").frame(width: 80)
+      Color.clear.frame(width: 28, height: 1)
+    }.font(.caption).foregroundStyle(.secondary)
+  }
+
+  private func macroRow(macro: Int, step: Int) -> some View {
+    HStack(spacing: 12) {
+      Text("\(step + 1)").monospacedDigit().foregroundStyle(.secondary).frame(width: 24)
+      TextField("键名", text: stepBinding(macro, step, \.key, fallback: ""))
+        .frame(minWidth: 90, maxWidth: .infinity)
+        .accessibilityLabel("事件 \(step + 1) 键名")
+      Toggle("按下", isOn: stepBinding(macro, step, \.down, fallback: false))
+        .labelsHidden().toggleStyle(.checkbox).frame(width: 42)
+        .accessibilityLabel("事件 \(step + 1) 按下")
+      Toggle("鼠标", isOn: stepBinding(macro, step, \.mouse, fallback: false))
+        .labelsHidden().toggleStyle(.checkbox).frame(width: 42)
+        .accessibilityLabel("事件 \(step + 1) 鼠标")
+      TextField("延时", value: stepBinding(macro, step, \.delayMs, fallback: 0), format: .number)
+        .frame(width: 80).accessibilityLabel("事件 \(step + 1) 延时毫秒")
+      Button {
+        guard model.macros.indices.contains(macro), model.macros[macro].steps.indices.contains(step)
+        else { return }
+        model.macros[macro].steps.remove(at: step)
+      } label: {
+        Image(systemName: "minus.circle")
       }
-      ForEach(model.savedProfiles, id: \.self) { name in
-        HStack {
-          Text(name)
+      .buttonStyle(.borderless).frame(width: 28).help("移除事件 \(step + 1)")
+    }
+  }
+
+  private func macroBinding<T>(
+    _ index: Int, _ keyPath: WritableKeyPath<KeyboardMacro, T>, fallback: T
+  ) -> Binding<T> {
+    Binding(
+      get: {
+        guard model.macros.indices.contains(index) else { return fallback }
+        return model.macros[index][keyPath: keyPath]
+      },
+      set: { value in
+        guard !model.recording, model.macros.indices.contains(index) else { return }
+        model.macros[index][keyPath: keyPath] = value
+      })
+  }
+
+  private func stepBinding<T>(
+    _ macro: Int, _ step: Int, _ keyPath: WritableKeyPath<MacroStep, T>, fallback: T
+  ) -> Binding<T> {
+    Binding(
+      get: {
+        guard model.macros.indices.contains(macro), model.macros[macro].steps.indices.contains(step)
+        else { return fallback }
+        return model.macros[macro].steps[step][keyPath: keyPath]
+      },
+      set: { value in
+        guard !model.recording, model.macros.indices.contains(macro),
+          model.macros[macro].steps.indices.contains(step)
+        else { return }
+        model.macros[macro].steps[step][keyPath: keyPath] = value
+      })
+  }
+
+  private func addMacro() {
+    model.macros.append(
+      KeyboardMacro(
+        name: "宏 \(model.macros.count + 1)",
+        steps: [MacroStep(key: "a", down: true), MacroStep(key: "a", down: false)]))
+    model.macroIndex = model.macros.count - 1
+  }
+
+  private func deleteMacro() {
+    guard model.macros.indices.contains(model.macroIndex) else { return }
+    model.macros.remove(at: model.macroIndex)
+    model.macroIndex = max(0, min(model.macroIndex, model.macros.count - 1))
+  }
+
+  private var profiles: some View {
+    VStack(alignment: .leading, spacing: 24) {
+      HubSection("保存当前草稿") {
+        HStack(spacing: 10) {
+          TextField("配置名称", text: $model.profileName).frame(maxWidth: 380)
+          Button("保存") { model.saveNamedProfile() }
+            .disabled(
+              model.profile == nil
+                || model.profileName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
           Spacer()
-          Button("载入") { model.loadNamedProfile(name) }
-          Button("删除") { model.deleteNamedProfile(name) }
         }
       }
-      HStack {
-        Button("导入 JSON…") { model.importProfile() }
-        Button("导出 JSON…") { model.exportProfile() }.disabled(model.profile == nil)
-      }
-      Button("生成恢复默认草稿") { model.factoryDraft() }.disabled(!model.canEdit)
-      Text("本地配置按型号保存，预览库独立。载入和恢复默认草稿均不会立即写设备。").font(.caption).foregroundStyle(.secondary)
-    }.onAppear { model.refreshLibrary() }
-  }
-  var diagnostics: some View {
-    VStack(alignment: .leading, spacing: 14) {
-      Menu("已知只读命令") {
-        ForEach(ReadSection.allCases, id: \.self) { section in
-          Button(section.rawValue) { model.diagnostic(name: section.rawValue) }
+      HubSection(
+        "已保存配置",
+        subtitle: "\(model.schema?.model ?? "K87") · \(model.previewMode ? "预览配置库" : "设备配置库")"
+      ) {
+        if model.savedProfiles.isEmpty {
+          HStack(spacing: 10) {
+            Image(systemName: "tray").foregroundStyle(.secondary)
+            Text("此配置库暂无文件").foregroundStyle(.secondary)
+          }.frame(maxWidth: .infinity, minHeight: 72, alignment: .center)
+        } else {
+          List(selection: $selectedProfile) {
+            ForEach(model.savedProfiles, id: \.self) { name in
+              Label(name, systemImage: "doc.text").tag(name)
+                .padding(.vertical, 4)
+            }
+          }.listStyle(.inset).frame(
+            height: min(220, max(112, CGFloat(model.savedProfiles.count) * 36))
+          )
+          .clipShape(RoundedRectangle(cornerRadius: 6))
+          .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(.separator.opacity(0.5)))
         }
-        Button("宏目录") { model.diagnostic(name: "macro") }
-        Button("型号/密码信息") { model.diagnostic(name: "password") }
-      }.disabled(model.selection == nil || model.busy)
-      HStack {
-        TextField("十六进制 payload", text: $rawHex)
-        Button("手工发送…") { model.diagnostic(hex: rawHex) }.disabled(
-          model.selection == nil || model.busy)
+        HStack(spacing: 10) {
+          Button("载入所选配置") {
+            if let selectedProfile { model.loadNamedProfile(selectedProfile) }
+          }.disabled(selectedProfile == nil)
+          Button("删除…", role: .destructive) {
+            if let selectedProfile { model.deleteNamedProfile(selectedProfile) }
+          }.disabled(selectedProfile == nil)
+          Spacer()
+          Button("导入 JSON…") { model.importProfile() }
+          Button("导出 JSON…") { model.exportProfile() }.disabled(model.profile == nil)
+        }
       }
-      Button("清空日志") { model.log = [] }
-      Picker("外观", selection: $model.theme) {
-        Text("跟随系统").tag("system")
-        Text("浅色").tag("light")
-        Text("深色").tag("dark")
-      }
-      Link("打开官方网页驱动", destination: URL(string: "https://www.mchose.com.cn/")!)
-      Text("输入报告访问：\(MacHID.inputAccessDescription)")
-      Button("打开输入监控设置") {
-        NSWorkspace.shared.open(
-          URL(
-            string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent")!)
-      }
-      Text(
-        "型号：\(model.schema?.model ?? "未知") · 通道：\(model.devices.first(where: { $0.id==model.selection })?.isWireless==true ? "2.4G" : model.selection==nil ? "离线" : "USB feature")"
-      )
-      if let result = model.captured {
-        Text("电量：\(result.battery.map { "\($0)%" } ?? "未知") · 已记录 \(result.exchanges.count) 次完整读取")
-      }
-      ForEach(Array(model.log.enumerated()), id: \.offset) {
-        Text($0.element).font(.system(.caption, design: .monospaced)).textSelection(.enabled)
-      }
-      if let captured = model.captured {
-        ScrollView {
-          Text(
-            captured.exchanges.map {
-              "\($0.section) RX \($0.response.count) bytes: "
-                + $0.response.prefix(32).map { String(format: "%02X", $0) }.joined(separator: " ")
-            }.joined(separator: "\n")
-          ).font(.system(.caption, design: .monospaced)).textSelection(.enabled)
-        }.frame(height: 220)
+      DisclosureGroup("恢复默认配置") {
+        HStack(spacing: 16) {
+          Text("生成默认草稿；查看并应用后才会写入设备。")
+            .font(.caption).foregroundStyle(.secondary)
+          Spacer()
+          Button("生成默认草稿") { model.factoryDraft() }.disabled(!model.canEdit)
+        }.padding(.top, 8)
       }
     }
+    .onAppear { model.refreshLibrary() }
+    .onChange(of: model.savedProfiles) {
+      if let selectedProfile, !model.savedProfiles.contains(selectedProfile) {
+        self.selectedProfile = nil
+      }
+    }
+  }
+
+  private var diagnostics: some View {
+    VStack(alignment: .leading, spacing: 24) {
+      HubSection("连接信息") {
+        Grid(alignment: .leading, horizontalSpacing: 24, verticalSpacing: 12) {
+          diagnosticRow(
+            "型号",
+            model.selection == nil
+              ? model.profile?.model ?? model.schema?.model ?? "未知"
+              : model.captured?.profile.model ?? "待读取确认")
+          diagnosticRow(
+            "通道",
+            model.selection == nil
+              ? "离线工作空间"
+              : model.devices.first(where: { $0.id == model.selection })?.isWireless == true
+                ? "2.4G 无线" : "USB 有线")
+          diagnosticRow("输入报告权限", MacHID.inputAccessDescription)
+          diagnosticRow("配置状态", model.captured == nil ? "尚未建立设备基线" : "已完成双次全量读取")
+          if let result = model.captured {
+            diagnosticRow("电量", result.battery.map { "\($0)%" } ?? "未知")
+          }
+        }
+        HStack(spacing: 10) {
+          Button("输入监控设置…") { openInputMonitoring() }
+          Link("官方驱动网站", destination: URL(string: "https://www.mchose.com.cn/")!)
+          Spacer()
+        }
+      }
+      HubSection("通信记录") {
+        HStack(spacing: 10) {
+          Menu("读取配置块") {
+            ForEach(ReadSection.allCases, id: \.self) { section in
+              Button(section.rawValue) { model.diagnostic(name: section.rawValue) }
+            }
+            Divider()
+            Button("宏目录") { model.diagnostic(name: "macro") }
+            Button("型号 / 密码信息") { model.diagnostic(name: "password") }
+          }.fixedSize().disabled(model.selection == nil)
+          Spacer()
+          Button("清空日志") { model.log = [] }.disabled(model.log.isEmpty)
+        }
+        if diagnosticLog.isEmpty {
+          Text("读取设备后，配置报告与操作记录会显示在这里。")
+            .font(.callout).foregroundStyle(.secondary).padding(.vertical, 12)
+        } else {
+          ScrollView([.vertical, .horizontal]) {
+            Text(diagnosticLog).font(.system(.caption, design: .monospaced))
+              .textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading).padding(12)
+          }.frame(height: 220)
+            .background(Color(nsColor: .textBackgroundColor))
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(.separator.opacity(0.5)))
+        }
+      }
+      DisclosureGroup("高级：手工 HID 报文") {
+        VStack(alignment: .leading, spacing: 10) {
+          Text("手工报文可能改变设备设置。发送前会要求确认，随后需要重新读取配置。")
+            .font(.caption).foregroundStyle(.secondary)
+          HStack(alignment: .top, spacing: 10) {
+            TextField("十六进制 payload", text: $rawHex, axis: .vertical)
+              .font(.system(.callout, design: .monospaced)).lineLimit(2...4)
+            Button("发送…") { model.diagnostic(hex: rawHex) }.disabled(model.selection == nil)
+          }
+        }.padding(.top, 8)
+      }
+    }
+  }
+
+  private var diagnosticLog: String {
+    var lines = model.log
+    if let captured = model.captured {
+      lines += captured.exchanges.map {
+        "\($0.section) RX \($0.response.count) bytes: "
+          + $0.response.prefix(32).map { String(format: "%02X", $0) }.joined(separator: " ")
+      }
+    }
+    return lines.joined(separator: "\n")
+  }
+
+  private func diagnosticRow(_ title: String, _ value: String) -> some View {
+    GridRow {
+      fieldLabel(title)
+      Text(value).textSelection(.enabled).foregroundStyle(.secondary)
+    }
+  }
+
+  private func fieldLabel(_ title: String) -> some View {
+    Text(title).frame(width: 104, alignment: .leading)
   }
 }

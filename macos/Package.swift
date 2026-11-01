@@ -14,6 +14,7 @@ let package = Package(
         .target(name: "MchoseHID", dependencies: ["MchoseCore"]),
         .executableTarget(name: "MchoseCLI", dependencies: ["MchoseCore", "MchoseHID"]),
         .executableTarget(name: "MchoseApp", dependencies: ["MchoseCore", "MchoseHID"]),
+        .testTarget(name: "MchoseAppTests", dependencies: ["MchoseApp", "MchoseCore", "MchoseHID"]),
         .testTarget(name: "MchoseCoreTests", dependencies: ["MchoseCore", "MchoseHID"],
                     resources: [.copy("Fixtures")])
     ],

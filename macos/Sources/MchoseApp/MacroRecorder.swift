@@ -7,8 +7,8 @@ struct MacroRecorder: NSViewRepresentable {
   let completed: ([MacroStep]) -> Void
   func makeNSView(context: Context) -> RecorderView { RecorderView() }
   func updateNSView(_ view: RecorderView, context: Context) {
-    view.completed = completed
-    view.stop = { recording = false }
+    view.completed = { steps in Task { @MainActor in completed(steps) } }
+    view.stop = { Task { @MainActor in recording = false } }
     if recording != view.recording {
       if recording {
         view.begin()
@@ -113,7 +113,7 @@ struct MacroRecorder: NSViewRepresentable {
     }
   }
   override func draw(_ dirtyRect: NSRect) {
-    NSColor.controlBackgroundColor.setFill()
+    NSColor.quaternaryLabelColor.setFill()
     NSBezierPath(roundedRect: bounds, xRadius: 8, yRadius: 8).fill()
     let text = recording ? "正在录制 · \(buffer.steps.count) 个事件 · 点击其他区域结束" : "点击此区域获得录制焦点"
     (text as NSString).draw(
