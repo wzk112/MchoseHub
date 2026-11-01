@@ -365,8 +365,12 @@ struct MainView: View {
                 .font(.caption).foregroundStyle(.secondary)
             }.frame(maxWidth: .infinity, minHeight: 330)
           }
-        }.frame(maxWidth: 940, alignment: .leading).padding(28).frame(
-          maxWidth: .infinity, alignment: .top)
+        }
+        .frame(maxWidth: 940, alignment: .leading)
+        .padding(28)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        // Resolve the split-view's animated geometry before laying out its descendants.
+        .geometryGroup()
       }
       .background(Color(nsColor: .windowBackgroundColor))
       .navigationTitle(
@@ -403,6 +407,7 @@ struct MainView: View {
       }
       .safeAreaInset(edge: .bottom, spacing: 0) { statusBar }
     }
+    .navigationSplitViewStyle(.balanced)
     .task { await model.monitor() }
     .preferredColorScheme(model.theme == "dark" ? .dark : model.theme == "light" ? .light : nil)
     .alert(
@@ -543,13 +548,14 @@ struct KeyboardDiagram: View {
   let select: (String) -> Void
   var body: some View {
     GeometryReader { geometry in
-      let width = positions.map { $0.x + CGFloat($0.key.width) }.max() ?? 836
-      let height = positions.map { $0.y + 36 }.max() ?? 260
+      let layout = KeyboardLayout(keys: keys)
+      let width = max(1, CGFloat(layout.width))
+      let height = max(1, CGFloat(layout.height))
       let scale = min(1.1, min(geometry.size.width / width, geometry.size.height / height))
       let offset = max(0, (geometry.size.width - width * scale) / 2)
       HubGlassGroup(spacing: 2) {
         ZStack(alignment: .topLeading) {
-          ForEach(positions, id: \.key.id) { item in
+          ForEach(layout.placements) { item in
             Button {
               select(item.key.key)
             } label: {
@@ -557,7 +563,7 @@ struct KeyboardDiagram: View {
                 .system(size: 10, weight: selected == item.key.key ? .semibold : .regular)
               )
               .lineLimit(1).minimumScaleFactor(0.6)
-              .frame(width: CGFloat(item.key.width) * scale, height: 36 * scale)
+              .frame(width: CGFloat(item.width), height: CGFloat(item.height))
               .contentShape(RoundedRectangle(cornerRadius: 6))
             }.buttonStyle(.plain)
               .hubGlass(
@@ -580,24 +586,16 @@ struct KeyboardDiagram: View {
               .accessibilityLabel(item.key.name).accessibilityAddTraits(
                 selected == item.key.key ? .isSelected : []
               )
-              .offset(x: offset + item.x * scale, y: item.y * scale)
+              .offset(x: CGFloat(item.x), y: CGFloat(item.y))
           }
-        }
+        }.frame(width: width, height: height, alignment: .topLeading)
       }
+      // Give the glass container the same explicit transform origin as the key canvas.
+      .frame(width: width, height: height, alignment: .topLeading)
+      // Keep keycaps in one coordinate space while the native sidebar resizes the detail.
+      .scaleEffect(scale, anchor: .topLeading)
+      .offset(x: offset)
     }
-  }
-  private var positions: [(key: BoardKey, x: CGFloat, y: CGFloat)] {
-    var x: CGFloat = 0
-    var y: CGFloat = 0
-    return keys.map { key in
-      if key.left == 0 && x > 0 {
-        x = 0
-        y += CGFloat(42 + key.top)
-      }
-      x += CGFloat(key.left)
-      let position = (key, x, y)
-      x += CGFloat(key.width + key.right)
-      return position
-    }
+    .geometryGroup()
   }
 }
