@@ -9,7 +9,9 @@ import UniformTypeIdentifiers
   @State private var model = AppModel()
   var body: some Scene {
     Window("MCHOSE HUB", id: "main") {
-      MainView(model: model).frame(minWidth: 1000, minHeight: 700)
+      GeometryReader { viewport in
+        MainView(model: model, viewportWidth: viewport.size.width)
+      }.frame(minWidth: 1000, minHeight: 700)
         .onAppear { delegate.model = model }
     }
     .defaultSize(width: 1140, height: 760)
@@ -299,6 +301,7 @@ enum SidebarDestination: Hashable {
 
 struct MainView: View {
   @Bindable var model: AppModel
+  let viewportWidth: CGFloat
   private let pages = [
     ("按键", "keyboard", "按键映射", "为默认层、Fn 和 Fn2 分配键盘、媒体与系统功能。"),
     ("灯光", "lightbulb", "灯光", "选择灯效，调整亮度，或设置每个按键的颜色。"),
@@ -406,6 +409,7 @@ struct MainView: View {
         }
       }
       .safeAreaInset(edge: .bottom, spacing: 0) { statusBar }
+      .background(WindowSplitBounds(viewportWidth: viewportWidth))
     }
     .navigationSplitViewStyle(.balanced)
     .task { await model.monitor() }
