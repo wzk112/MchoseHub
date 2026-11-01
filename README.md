@@ -2,7 +2,7 @@
 
 2026-11-01 R2。适用于 Windows x64，重点支持 K87 有线和 2.4G 配置。
 
-当前客户端为 Windows 原生 WinUI 3 应用，macOS 原生客户端尚未实现。在 Mac 上继续开发时，先阅读 [macOS 移植说明](docs/MACOS_PORT.md)。`MchoseHub.Core` 的协议、数据结构和离线测试与 Windows 界面分离。
+Windows 客户端使用原生 WinUI 3。仓库新增 [Swift 原生 macOS 版](macos/README.md)，接入已有键盘的灯光、性能、三层映射、宏、配置库、USB/2.4G 与音频 HID 功能；真实 K87 2.4G 已通过双次完整读取和亮度、休眠、单键的修改/恢复。代码与实机验收范围见 [macOS 验证记录](macos/VALIDATION.md)。继续开发时请先阅读 [macOS 移植说明](docs/MACOS_PORT.md)。
 
 ## 本次更新
 

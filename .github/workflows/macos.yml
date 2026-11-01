@@ -1,0 +1,33 @@
+name: macOS native
+on:
+  push:
+  pull_request:
+jobs:
+  native:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Core reference tests
+        run: |
+          dotnet build src/MchoseHub.Core -c Release -p:TreatWarningsAsErrors=true
+          dotnet run --project tests/MchoseHub.Tests -c Release -p:TreatWarningsAsErrors=true
+      - name: Check shared schema and C# fixtures
+        run: |
+          python3 tools/sync-macos-resources.py --check
+          dotnet run --project tools/MchoseHub.MacFixtures -c Release -p:TreatWarningsAsErrors=true -- "$RUNNER_TEMP/fixtures"
+          diff -ru macos/Tests/MchoseCoreTests/Fixtures "$RUNNER_TEMP/fixtures"
+      - name: Swift tests and bidirectional profile compatibility
+        working-directory: macos
+        run: |
+          swift test -Xswiftc -warnings-as-errors
+          swift run mchose roundtrip --profile Tests/MchoseCoreTests/Fixtures/profile.json --out "$RUNNER_TEMP/swift-profile.json"
+          dotnet run --project ../tools/MchoseHub.MacFixtures -c Release -- --validate "$RUNNER_TEMP/swift-profile.json"
+      - name: Build app and CLI
+        run: bash macos/build-app.sh artifacts/macos
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MchoseHub-macOS-developer-preview
+          path: artifacts/macos

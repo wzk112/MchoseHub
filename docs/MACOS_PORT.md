@@ -1,6 +1,6 @@
 # macOS 原生版移植说明
 
-更新：2026-11-02。当前交付的是 Windows 版；尚未实现或在 Mac 上验证原生客户端。首个目标为 **K87 USB 有线**，先完成可靠的读取、备份和恢复，再接入原生界面。2.4G 后续单独验证。
+更新：2026-11-02。仓库新增 [Swift 原生 macOS 版](../macos/README.md)，覆盖现有 Windows 客户端的键盘、宏、配置和音频 HID 功能入口。Core 在本机通过 64 项检查，Swift 通过 31 项检查；18 型号恢复报文、宏与 60 组无线分包均以 C# 为逐字节对照，JSON 已完成 C# → Swift → C# 往返。按本次用户设备条件，先在 **K87 2.4G** 完成双次全量备份及亮度、休眠、单键的可恢复实测，全部已解析字段恢复一致。USB 有线和其余硬件范围尚待实测，详见 [验证记录](../macos/VALIDATION.md)。下方保留首次 USB 移植的实施流程。
 
 ## 现有内容如何复用
 
@@ -21,7 +21,7 @@ Core 和测试的目标框架是 `net8.0`；App、Platform.Windows 和 CLI 使�
 - **独立配置服务**：UI 只提交编辑意图，设备操作串行执行；切换或拔出设备时取消旧任务，丢弃旧会话回调，失败后重新读取配置。预览模式使用独立数据，不触碰设备。
 - **IOKit / IOHIDManager 传输**：以用户态 HID 枚举、feature 请求和 input 回调实现配置通道；匹配条件由型号、产品名、厂商集合和报告描述符共同确定，见 [IOHIDManagerSetDeviceMatching](https://developer.apple.com/documentation/iokit/1438371-iohidmanagersetdevicematching)。同步 HID 操作放在后台串行队列；移除时停止接收、结束在途操作后再释放句柄与回调缓冲。
 
-上述为实施路径，本仓库暂未提供未经 Mac 验证的 Swift 或 IOKit 实现。
+上述结构已在 `macos/` 建立 Swift / IOKit 实现，并在 Apple Silicon Mac 上构建。IORegistry 枚举不打开 HID，配置操作走后台串行队列；2.4G 使用独立 input 回调队列和分包通道，取消后等待回调结束再释放缓冲。原生界面已接入编辑、应用、备份、配置库、宏及诊断；应用前备份并检测基线漂移。GUI 的 macOS 输入监控权限需用户授予，CLI 验证不能替代 GUI 授权后的实机验收。
 
 ## K87 报告边界
 
@@ -44,7 +44,7 @@ Apple 的 [IOHIDDeviceSetReport](https://developer.apple.com/documentation/iokit
 ## 第一次在 Mac 上开发
 
 1. 克隆仓库，安装 Xcode 和适合本机架构的 .NET SDK；运行当前测试还需有 .NET 8 运行时。Apple Silicon 选择 Arm64，Intel 选择 x64，系统兼容范围以 [Microsoft macOS 安装说明](https://learn.microsoft.com/en-us/dotnet/core/install/macos) 为准。
-2. 在仓库根目录先运行下面的离线命令，只构建 Core 和测试。现有完整 solution、Windows CLI 和 `build.ps1` 不能作为 Mac 构建入口。
+2. 在仓库根目录先运行下面的离线命令，只构建 Core 和测试。现有完整 solution、Windows CLI 和 `build.ps1` 不能作为 Mac 构建入口；原生入口与打包命令见 [macos/README.md](../macos/README.md)。
 
 ```sh
 dotnet --info
@@ -62,6 +62,6 @@ dotnet run --project tests/MchoseHub.Tests/MchoseHub.Tests.csproj -c Release -p:
 
 ## 验证范围
 
-Windows K87 有线已有亮度、休眠和单键映射的恢复证据；这些结果不能替代 Mac 实测。宏先做本地编码、录制与容量测试，未能备份完整宏库时不覆盖设备宏库。2.4G 目前仅有离线协议验证，蓝牙未覆盖；无线接收包及 ACK 末字节的校验规则仍需证据，不凭猜测改动兼容行为。
+Windows K87 有线已有亮度、休眠和单键映射的恢复证据；本轮 Mac K87 2.4G 也完成了对应三项配置往返和全量比较，不能据此宣称 USB 有线或实际灯光/键值行为全部通过。宏先做本地编码、录制与容量测试，未能备份完整宏库时不自动覆盖设备宏库。蓝牙未覆盖；无线接收包及 ACK 末字节的校验规则仍需证据，不凭猜测改动兼容行为。
 
 音乐/GIF、云模板、固件升级、多设备灯光同步及程序关联切换仍未原生实现。首次 Mac 验证不包含固件升级、恢复出厂或新增板载配置槽。

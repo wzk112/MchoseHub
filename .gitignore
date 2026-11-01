@@ -8,6 +8,7 @@
 .vs/
 .DS_Store
 **/.build/
+**/.swiftpm/
 **/DerivedData/
 /work/
 /outputs/
@@ -27,4 +28,5 @@
 /baseline.txt
 /keys-dump.txt
 /k87-diy-backup.json
+/macos/local-captures/
 /UI重构与源码审计-20260921.md
