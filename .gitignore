@@ -1,0 +1,30 @@
+**/bin/
+**/obj/
+**/node_modules/
+*.user
+*.suo
+
+# Local builds, editors and generated output
+.vs/
+.DS_Store
+**/.build/
+**/DerivedData/
+/work/
+/outputs/
+/artifacts/
+/publish/
+*.log
+*.log.*
+
+# Local credentials
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+
+# Local hardware captures and earlier working notes
+/baseline.txt
+/keys-dump.txt
+/k87-diy-backup.json
+/UI重构与源码审计-20260921.md

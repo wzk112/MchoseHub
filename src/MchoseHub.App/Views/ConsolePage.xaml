@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="MchoseHub.App.Views.ConsolePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid
+        Padding="{StaticResource PagePadding}"
+        RowSpacing="16"
+        MaxWidth="{StaticResource ContentMaxWidth}"
+        HorizontalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Spacing="4">
+                <TextBlock Text="诊断日志" Style="{StaticResource TitleTextBlockStyle}" FontSize="28" />
+                <TextBlock Style="{StaticResource AppCaptionStyle}" Text="查看设备收发记录与响应。" />
+            </StackPanel>
+            <Border Grid.Column="1" Style="{StaticResource AppPillStyle}" VerticalAlignment="Top">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Image Source="{ThemeResource HubSettingsIconSource}" Width="16" Height="16" />
+                    <TextBlock Text="高级工具" Style="{StaticResource CaptionTextBlockStyle}" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="1" Style="{StaticResource AppCardStyle}" Padding="22,18">
+            <StackPanel Spacing="12">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="3">
+                        <TextBlock Text="手工发送 output report" Style="{StaticResource AppCardTitleStyle}" />
+                        <TextBlock Style="{StaticResource AppCaptionStyle}" Text="仅用于协议调试。发送前确认 reportId、载荷长度和目标设备都正确。" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="清空日志" Click="OnClear" VerticalAlignment="Center" />
+                </Grid>
+
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="ReportIdBox" Header="reportId（hex）" Text="BC" />
+                    <TextBox Grid.Column="1" x:Name="PayloadBox" Header="payload（hex）" PlaceholderText="11 00 00 …" />
+                    <Button Grid.Column="2" Content="发送报文" Click="OnSend" VerticalAlignment="Bottom" Style="{StaticResource AccentButtonStyle}" />
+                </Grid>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="查询状态（第二代）" Click="OnSendBaseState" />
+                    <Button Content="查询状态（第一代）" Click="OnSendLegacyState" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource AppCardStyle}" Padding="0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Border Padding="16,12" BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Image Source="{ThemeResource HubLogsIconSource}" Width="18" Height="18" />
+                        <TextBlock Text="实时记录" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    </StackPanel>
+                </Border>
+                <ListView
+                    x:Name="LogList"
+                    Grid.Row="1"
+                    SelectionMode="None"
+                    Padding="12"
+                    FontFamily="Consolas"
+                    ItemsSource="{x:Bind Logs}">
+                    <ListView.ItemContainerTransitions>
+                        <TransitionCollection>
+                            <AddDeleteThemeTransition />
+                        </TransitionCollection>
+                    </ListView.ItemContainerTransitions>
+                </ListView>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

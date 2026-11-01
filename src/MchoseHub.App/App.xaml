@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application
+    x:Class="MchoseHub.App.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+            </ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SvgImageSource x:Key="HubBrandIconSource" UriSource="ms-appx:///Assets/Icons/brand-light.svg" />
+                    <SvgImageSource x:Key="HubKeyboardIconSource" UriSource="ms-appx:///Assets/Icons/keyboard-light.svg" />
+                    <SvgImageSource x:Key="HubLogsIconSource" UriSource="ms-appx:///Assets/Icons/logs-light.svg" />
+                    <SvgImageSource x:Key="HubSettingsIconSource" UriSource="ms-appx:///Assets/Icons/settings-light.svg" />
+                    <SvgImageSource x:Key="HubHeadphonesIconSource" UriSource="ms-appx:///Assets/Icons/headphones-light.svg" />
+                    <SvgImageSource x:Key="HubDeviceIconSource" UriSource="ms-appx:///Assets/Icons/device-light.svg" />
+                    <SvgImageSource x:Key="HubAppearanceIconSource" UriSource="ms-appx:///Assets/Icons/appearance-light.svg" />
+                    <SvgImageSource x:Key="HubReconnectIconSource" UriSource="ms-appx:///Assets/Icons/reconnect-light.svg" />
+                    <SvgImageSource x:Key="HubInfoIconSource" UriSource="ms-appx:///Assets/Icons/info-light.svg" />
+                    <SolidColorBrush x:Key="HubCanvasBrush" Color="#F4F6F9" />
+                    <SolidColorBrush x:Key="HubCardBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="HubHeroBrush" Color="#EDF3F8" />
+                    <SolidColorBrush x:Key="HubInsetBrush" Color="#F5F7FA" />
+                    <SolidColorBrush x:Key="HubStrokeBrush" Color="#E2E8EF" />
+                    <SolidColorBrush x:Key="HubBoardBrush" Color="#E9EEF4" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Default">
+                    <SvgImageSource x:Key="HubBrandIconSource" UriSource="ms-appx:///Assets/Icons/brand-dark.svg" />
+                    <SvgImageSource x:Key="HubKeyboardIconSource" UriSource="ms-appx:///Assets/Icons/keyboard-dark.svg" />
+                    <SvgImageSource x:Key="HubLogsIconSource" UriSource="ms-appx:///Assets/Icons/logs-dark.svg" />
+                    <SvgImageSource x:Key="HubSettingsIconSource" UriSource="ms-appx:///Assets/Icons/settings-dark.svg" />
+                    <SvgImageSource x:Key="HubHeadphonesIconSource" UriSource="ms-appx:///Assets/Icons/headphones-dark.svg" />
+                    <SvgImageSource x:Key="HubDeviceIconSource" UriSource="ms-appx:///Assets/Icons/device-dark.svg" />
+                    <SvgImageSource x:Key="HubAppearanceIconSource" UriSource="ms-appx:///Assets/Icons/appearance-dark.svg" />
+                    <SvgImageSource x:Key="HubReconnectIconSource" UriSource="ms-appx:///Assets/Icons/reconnect-dark.svg" />
+                    <SvgImageSource x:Key="HubInfoIconSource" UriSource="ms-appx:///Assets/Icons/info-dark.svg" />
+                    <SolidColorBrush x:Key="HubCanvasBrush" Color="#171B23" />
+                    <SolidColorBrush x:Key="HubCardBrush" Color="#202630" />
+                    <SolidColorBrush x:Key="HubHeroBrush" Color="#252F3C" />
+                    <SolidColorBrush x:Key="HubInsetBrush" Color="#191F29" />
+                    <SolidColorBrush x:Key="HubStrokeBrush" Color="#323C4B" />
+                    <SolidColorBrush x:Key="HubBoardBrush" Color="#151B24" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="HighContrast">
+                    <SvgImageSource x:Key="HubBrandIconSource" UriSource="ms-appx:///Assets/Icons/brand-contrast.svg" />
+                    <SvgImageSource x:Key="HubKeyboardIconSource" UriSource="ms-appx:///Assets/Icons/keyboard-contrast.svg" />
+                    <SvgImageSource x:Key="HubLogsIconSource" UriSource="ms-appx:///Assets/Icons/logs-contrast.svg" />
+                    <SvgImageSource x:Key="HubSettingsIconSource" UriSource="ms-appx:///Assets/Icons/settings-contrast.svg" />
+                    <SvgImageSource x:Key="HubHeadphonesIconSource" UriSource="ms-appx:///Assets/Icons/headphones-contrast.svg" />
+                    <SvgImageSource x:Key="HubDeviceIconSource" UriSource="ms-appx:///Assets/Icons/device-contrast.svg" />
+                    <SvgImageSource x:Key="HubAppearanceIconSource" UriSource="ms-appx:///Assets/Icons/appearance-contrast.svg" />
+                    <SvgImageSource x:Key="HubReconnectIconSource" UriSource="ms-appx:///Assets/Icons/reconnect-contrast.svg" />
+                    <SvgImageSource x:Key="HubInfoIconSource" UriSource="ms-appx:///Assets/Icons/info-contrast.svg" />
+                    <SolidColorBrush x:Key="HubCanvasBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="HubCardBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="HubHeroBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="HubInsetBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    <SolidColorBrush x:Key="HubStrokeBrush" Color="{ThemeResource SystemColorWindowTextColor}" />
+                    <SolidColorBrush x:Key="HubBoardBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+
+
+            <!-- 统一的页面节奏与视觉层级。页面只组合语义，不再各自发明间距和卡片。 -->
+            <Thickness x:Key="PagePadding">20,16,20,24</Thickness>
+            <x:Double x:Key="ContentMaxWidth">1320</x:Double>
+            <x:Double x:Key="CardGap">16</x:Double>
+
+            <Style x:Key="AppCardStyle" TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource HubCardBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource HubStrokeBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="16" />
+                <Setter Property="Padding" Value="18" />
+            </Style>
+
+            <Style x:Key="AppHeroCardStyle" TargetType="Border" BasedOn="{StaticResource AppCardStyle}">
+                <Setter Property="Background" Value="{ThemeResource HubHeroBrush}" />
+                <Setter Property="CornerRadius" Value="20" />
+                <Setter Property="Padding" Value="26" />
+            </Style>
+
+            <Style x:Key="AppInsetCardStyle" TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource HubInsetBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource HubStrokeBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="10" />
+                <Setter Property="Padding" Value="16" />
+            </Style>
+
+            <Style x:Key="AppPillStyle" TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource HubInsetBrush}" />
+                <Setter Property="CornerRadius" Value="16" />
+                <Setter Property="Padding" Value="10,4" />
+            </Style>
+
+            <Style x:Key="AppCardTitleStyle" TargetType="TextBlock" BasedOn="{StaticResource BodyStrongTextBlockStyle}">
+                <Setter Property="Margin" Value="0,0,0,4" />
+                <Setter Property="FontSize" Value="16" />
+            </Style>
+
+            <Style x:Key="AppSectionTitleStyle" TargetType="TextBlock" BasedOn="{StaticResource SubtitleTextBlockStyle}">
+                <Setter Property="Margin" Value="0,4,0,0" />
+            </Style>
+
+            <Style x:Key="AppCaptionStyle" TargetType="TextBlock" BasedOn="{StaticResource CaptionTextBlockStyle}">
+                <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+                <Setter Property="LineHeight" Value="20" />
+            </Style>
+
+            <Style x:Key="AppBodyStyle" TargetType="TextBlock" BasedOn="{StaticResource BodyTextBlockStyle}">
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+
+            <Style x:Key="AppFieldLabelStyle" TargetType="TextBlock" BasedOn="{StaticResource CaptionTextBlockStyle}">
+                <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                <Setter Property="Margin" Value="0,0,0,4" />
+            </Style>
+
+            <Style x:Key="AppEyebrowStyle" TargetType="TextBlock" BasedOn="{StaticResource CaptionTextBlockStyle}">
+                <Setter Property="Foreground" Value="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="CharacterSpacing" Value="80" />
+            </Style>
+
+            <!-- Dynamic keyboard controls keep theme expressions in their styles. -->
+            <Style x:Key="HubKeyStyle" TargetType="Button">
+                <Setter Property="Background" Value="{ThemeResource ControlFillColorDefaultBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource ControlStrokeColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+            </Style>
+            <Style x:Key="HubChangedKeyStyle" TargetType="Button" BasedOn="{StaticResource HubKeyStyle}">
+                <Setter Property="Background" Value="{ThemeResource AccentFillColorTertiaryBrush}" />
+            </Style>
+            <Style x:Key="HubSelectedKeyStyle" TargetType="Button" BasedOn="{StaticResource HubKeyStyle}">
+                <Setter Property="BorderBrush" Value="{ThemeResource AccentFillColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="2" />
+            </Style>
+            <Style x:Key="HubSelectedChangedKeyStyle" TargetType="Button" BasedOn="{StaticResource HubChangedKeyStyle}">
+                <Setter Property="BorderBrush" Value="{ThemeResource AccentFillColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="2" />
+            </Style>
+            <Style x:Key="HubKeyboardWellStyle" TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource HubBoardBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource HubStrokeBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="14" />
+                <Setter Property="Padding" Value="16" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

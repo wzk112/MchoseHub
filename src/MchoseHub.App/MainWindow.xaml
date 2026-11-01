@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="MchoseHub.App.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid x:Name="RootGrid" Background="{ThemeResource HubCanvasBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 自定义标题栏 -->
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="60" Padding="20,0,150,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <Border
+                    Width="30"
+                    Height="30"
+                    CornerRadius="8"
+                    Background="{ThemeResource AccentFillColorTertiaryBrush}">
+                    <Image Source="{ThemeResource HubBrandIconSource}" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel Spacing="0" VerticalAlignment="Center">
+                    <TextBlock Text="MCHOSE HUB" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <TextBlock Text="键盘配置" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+
+            <!-- 连接状态：小圆点 + 文字，一眼看出现在连没连上 -->
+            <Border
+                Grid.Column="2"
+                VerticalAlignment="Center"
+                Style="{StaticResource AppPillStyle}"
+                Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <Ellipse x:Name="StatusIcon" Width="7" Height="7" Fill="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                    <TextBlock
+                        x:Name="StatusText"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        VerticalAlignment="Center"
+                        Text="未连接" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <NavigationView
+            x:Name="Nav"
+            Grid.Row="1"
+            IsBackButtonVisible="Auto"
+            IsSettingsVisible="False"
+            PaneDisplayMode="LeftCompact"
+            ExpandedModeThresholdWidth="1240"
+            CompactModeThresholdWidth="760"
+            IsPaneToggleButtonVisible="True"
+            CompactPaneLength="56"
+            OpenPaneLength="188"
+            SelectionChanged="OnNavSelectionChanged"
+            ItemInvoked="OnNavItemInvoked"
+            BackRequested="OnNavBackRequested">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="设备中心" Tag="devices">
+                    <NavigationViewItem.Icon><ImageIcon Source="{ThemeResource HubKeyboardIconSource}" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="诊断日志" Tag="console">
+                    <NavigationViewItem.Icon><ImageIcon Source="{ThemeResource HubLogsIconSource}" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="应用设置" Tag="settings">
+                    <NavigationViewItem.Icon><ImageIcon Source="{ThemeResource HubSettingsIconSource}" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+            <Frame x:Name="ContentFrame" />
+        </NavigationView>
+
+        <!-- 右下角的应用内提示：新消息浮出来，几秒后自己淡出（见 Toast.cs） -->
+        <StackPanel
+            x:Name="ToastHost"
+            Grid.Row="1"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Margin="0,0,20,20"
+            Spacing="8"
+            MaxWidth="420" />
+    </Grid>
+</Window>

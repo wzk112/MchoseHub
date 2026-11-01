@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="MchoseHub.App.Views.DeviceDetailPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid MaxWidth="{StaticResource ContentMaxWidth}" HorizontalAlignment="Stretch">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="138" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- ==================== 设备头 ==================== -->
+        <Border Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource AppHeroCardStyle}" Margin="20,16,20,0" Padding="16">
+            <StackPanel Spacing="14">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border
+                        Width="48"
+                        Height="48"
+                        CornerRadius="14"
+                        Background="{ThemeResource AccentFillColorTertiaryBrush}"
+                        VerticalAlignment="Top">
+                        <Image x:Name="DeviceIcon" Source="{ThemeResource HubKeyboardIconSource}" Width="28" Height="28" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+
+                    <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                        <TextBlock x:Name="DeviceName" Style="{StaticResource TitleTextBlockStyle}" FontSize="24" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                        <TextBlock x:Name="DeviceSubtitle" Style="{StaticResource AppCaptionStyle}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Spacing="8" HorizontalAlignment="Right">
+                        <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">
+                            <TextBlock x:Name="BatteryText" Style="{StaticResource AppCaptionStyle}" VerticalAlignment="Center" />
+                            <Border Style="{StaticResource AppPillStyle}">
+                                <TextBlock x:Name="ChannelBadge" Style="{StaticResource CaptionTextBlockStyle}" />
+                            </Border>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                            <Button x:Name="RetryProbeButton" Content="重新探测" Click="OnRetryProbe" />
+                            <Button x:Name="BatteryButton" Content="读取电量" Click="OnReadBattery" />
+                            <Button x:Name="CloseDeviceButton" Content="断开" Click="OnCloseDevice" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+
+                <!-- 常驻状态才放 InfoBar：它会一直待着等人处理，不适合放「刚发生的事」 -->
+                <StackPanel x:Name="ChannelStatePanel" Spacing="8" Visibility="Collapsed">
+                    <InfoBar
+                        x:Name="ChannelNote"
+                        IsOpen="True"
+                        IsClosable="False"
+                        Severity="Informational"
+                        Title="正在探测配置通道" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- 功能导航 -->
+        <Border Grid.Row="1" Grid.RowSpan="2" Grid.Column="0" Style="{StaticResource AppInsetCardStyle}" Padding="6" Margin="20,10,0,20">
+            <ListBox x:Name="SectionNav" SelectionMode="Single" SelectionChanged="OnSectionChanged" Background="Transparent" BorderThickness="0" Padding="0">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="MinHeight" Value="42" />
+                        <Setter Property="Padding" Value="14,10" />
+                        <Setter Property="Margin" Value="0,0,0,4" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBoxItem x:Name="NavLighting" Content="灯光" Tag="lighting" />
+                <ListBoxItem x:Name="NavKeys" Content="按键" Tag="keys" />
+                <ListBoxItem x:Name="NavMacros" Content="宏" Tag="macros" />
+                <ListBoxItem x:Name="NavProfiles" Content="配置" Tag="profiles" />
+                <ListBoxItem x:Name="NavPerformance" Content="性能" Tag="performance" />
+                <ListBoxItem x:Name="NavDiagnostics" Content="诊断" Tag="diagnostics" />
+                <ListBoxItem x:Name="NavAbout" Content="关于" Tag="about" />
+            </ListBox>
+        </Border>
+
+        <ScrollViewer
+            Grid.Row="1" Grid.RowSpan="2" Grid.Column="1"
+            Padding="{StaticResource PagePadding}"
+            HorizontalScrollMode="Disabled"
+            HorizontalScrollBarVisibility="Disabled">
+            <Grid HorizontalAlignment="Stretch">
+
+
+                <!-- 灯光：键盘位于首屏，参数与维护有明确层级。 -->
+                <Grid x:Name="PanelLighting" RowSpacing="16" ColumnSpacing="16" SizeChanged="OnLightingLayoutChanged">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Spacing="4">
+                        <TextBlock Text="灯光设置" Style="{StaticResource AppSectionTitleStyle}" />
+                        <TextBlock x:Name="LightingHint" Style="{StaticResource AppCaptionStyle}" />
+                    </StackPanel>
+                    <Border x:Name="LightingKeyboardCard" Grid.Row="1" Grid.Column="0" Style="{StaticResource AppCardStyle}" VerticalAlignment="Top">
+                        <StackPanel Spacing="14">
+                            <Grid ColumnSpacing="16">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <StackPanel Spacing="3">
+                                    <TextBlock Text="键盘灯色" Style="{StaticResource AppCardTitleStyle}" />
+                                    <TextBlock x:Name="DiyHint" Style="{StaticResource AppCaptionStyle}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Border x:Name="ColorSection">
+                                        <Button Content="选择颜色">
+                                            <Button.Flyout>
+                                                <Flyout Placement="Bottom">
+                                                    <StackPanel Spacing="10">
+                                                        <TextBlock Text="灯光颜色" Style="{StaticResource AppCardTitleStyle}" />
+                                                        <ColorPicker x:Name="ColorSelector" IsAlphaEnabled="False" IsHexInputVisible="True" IsMoreButtonVisible="False" IsColorChannelTextInputVisible="False" IsColorPreviewVisible="True" ColorSpectrumShape="Ring" ColorChanged="OnColorChanged" HorizontalAlignment="Left" />
+                                                    </StackPanel>
+                                                </Flyout>
+                                            </Button.Flyout>
+                                        </Button>
+                                    </Border>
+                                    <Button x:Name="DiyCustomModeButton" Content="启用逐键灯光" Click="OnSwitchToCustomMode" />
+                                </StackPanel>
+                            </Grid>
+                            <Border Style="{StaticResource HubKeyboardWellStyle}">
+                                <Viewbox Stretch="Uniform" MaxHeight="272" HorizontalAlignment="Stretch">
+                                    <Canvas x:Name="DiyBoard" Height="272" />
+                                </Viewbox>
+                            </Border>
+                            <TextBlock x:Name="DiySelection" Text="选择颜色后点击按键进行设置" Style="{StaticResource AppBodyStyle}" />
+                            <Grid ColumnSpacing="8" RowSpacing="8">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                                <Button Content="全部填充" Click="OnFillAllKeys" HorizontalAlignment="Stretch" />
+                                <Button Grid.Column="1" Content="清空灯色" Click="OnClearAllKeys" HorizontalAlignment="Stretch" />
+                                <Button Grid.Row="1" Content="恢复出厂灯色" Click="OnRestoreDiyDefault" HorizontalAlignment="Stretch" />
+                                <Button Grid.Row="1" Grid.Column="1" Content="重新读取" Click="OnReloadDiy" HorizontalAlignment="Stretch" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                    <Border x:Name="LightingParametersCard" Grid.Row="1" Grid.Column="1" Style="{StaticResource AppCardStyle}" VerticalAlignment="Top">
+                        <StackPanel Spacing="14">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="灯效参数" Style="{StaticResource AppCardTitleStyle}" />
+                                <TextBlock Text="连接设备后自动写入更改。" Style="{StaticResource AppCaptionStyle}" />
+                                <ToggleSwitch x:Name="MultiColorSwitch" OnContent="多彩" OffContent="单色" Toggled="OnMultiColorChanged" />
+                            </StackPanel>
+                            <ScrollViewer HorizontalScrollMode="Enabled" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled">
+                                <StackPanel x:Name="EffectQuickPanel" Orientation="Horizontal" Spacing="8" />
+                            </ScrollViewer>
+                            <TextBlock x:Name="EffectStatus" Style="{StaticResource AppCaptionStyle}" />
+                            <Expander HorizontalAlignment="Stretch" Header="浏览全部灯效">
+                                <StackPanel Spacing="12">
+                                    <ComboBox x:Name="EffectBox" Header="灯效" HorizontalAlignment="Stretch" SelectionChanged="OnEffectChanged" DropDownClosed="OnEffectDropDownClosed" />
+                                    <ToggleSwitch x:Name="EffectMoreSwitch" OnContent="全部灯效" OffContent="常用灯效" Toggled="OnEffectMoreToggled" />
+                                </StackPanel>
+                            </Expander>
+                            <TextBlock x:Name="EffectNote" Style="{StaticResource AppCaptionStyle}" Visibility="Collapsed" />
+                            <Grid RowSpacing="12" Margin="0,4,0,0">
+                                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                                <StackPanel Spacing="6">
+                                    <TextBlock x:Name="BrightnessLabel" Text="亮度" Style="{StaticResource AppFieldLabelStyle}" />
+                                    <Slider x:Name="BrightnessSlider" Minimum="0" Maximum="100" Value="80" StepFrequency="1" ValueChanged="OnBrightnessChanged" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Spacing="6">
+                                    <TextBlock x:Name="SpeedLabel" Text="速度" Style="{StaticResource AppFieldLabelStyle}" />
+                                    <Slider x:Name="SpeedSlider" Minimum="1" Maximum="5" Value="4" StepFrequency="1" ValueChanged="OnSpeedChanged" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                    <InfoBar Grid.Row="2" Grid.ColumnSpan="2" x:Name="LightingNote" IsOpen="False" IsClosable="True" />
+                    <Expander x:Name="LightingMaintenance" Grid.Row="3" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Header="同步与灯光维护">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="需要重新同步，或灯效没有响应时，可使用以下操作。" Style="{StaticResource AppCaptionStyle}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="立即同步" Click="OnApplyLighting" Style="{StaticResource AccentButtonStyle}" />
+                                <Button Content="读取当前设置" Click="OnReloadSettings" />
+                                <Button Content="修复灯效" Click="OnRepairLight" ToolTipService.ToolTip="还原内部灯效参数，保留你的灯光设置" />
+                                <Button Content="强制点亮" Click="OnForceLight" ToolTipService.ToolTip="切为常亮和最高亮度" />
+                                <Button x:Name="ResetButton" Content="恢复默认" Click="OnRestoreDefault" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Expander>
+                </Grid>
+
+                <StackPanel x:Name="PanelKeys" Spacing="16" Visibility="Collapsed">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="按键映射" Style="{StaticResource AppSectionTitleStyle}" />
+                        <TextBlock Text="选择按键，再指定它的新功能。默认、Fn、Fn2 各层独立设置。" Style="{StaticResource AppCaptionStyle}" />
+                    </StackPanel>
+                    <Border Style="{StaticResource AppCardStyle}">
+                        <StackPanel Spacing="16">
+                            <Grid ColumnSpacing="16">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <ComboBox x:Name="KeyLayerBox" MinWidth="164" SelectionChanged="OnKeyLayerChanged" AutomationProperties.Name="按键层" />
+                                <Button Grid.Column="1" Content="读取按键" Click="OnReadKeySetting" VerticalAlignment="Center" />
+                            </Grid>
+                            <Border Style="{StaticResource HubKeyboardWellStyle}">
+                                <Viewbox Stretch="Uniform" MaxHeight="272" HorizontalAlignment="Stretch">
+                                    <Canvas x:Name="RemapBoard" Height="272" />
+                                </Viewbox>
+                            </Border>
+                            <Border x:Name="RemapPanel" Style="{StaticResource AppInsetCardStyle}" Visibility="Collapsed">
+                                <StackPanel Spacing="12">
+                                    <TextBlock x:Name="RemapLabel" Text="选中一个键" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                    <Grid ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                        <ComboBox x:Name="RemapTargetBox" MinWidth="160" IsEditable="True" PlaceholderText="搜索或选择目标功能" HorizontalAlignment="Stretch" />
+                                        <Button Grid.Column="1" Content="应用改键" Click="OnApplyRemap" Style="{StaticResource AccentButtonStyle}" />
+                                        <Button Grid.Column="2" Content="恢复该键默认" Click="OnResetKey" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                            <TextBlock x:Name="KeySummary" Style="{StaticResource AppCaptionStyle}" />
+                            <Expander HorizontalAlignment="Stretch" Header="查看按键映射列表">
+                            <ListView
+                                x:Name="KeyListView"
+                                MinHeight="120"
+                                MaxHeight="320"
+                                SelectionMode="Single"
+                                IsItemClickEnabled="True"
+                                ItemClick="OnKeyRowClicked">
+                                <!-- 102 个键要在一屏里尽量多显示几个：默认行高太松 -->
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="MinHeight" Value="32" />
+                                        <Setter Property="Padding" Value="8,2" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnSpacing="12" Padding="4,6">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Key}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                            <TextBlock
+                                                Grid.Column="1"
+                                                Text="{Binding Value}"
+                                                FontFamily="Consolas"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                Style="{StaticResource CaptionTextBlockStyle}"
+                                                VerticalAlignment="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+
+                            </Expander>
+                            <TextBox x:Name="KeyResult" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" FontFamily="Consolas" MinHeight="80" Visibility="Collapsed" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel x:Name="PanelMacros" Spacing="16" Visibility="Collapsed">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="宏编辑" Style="{StaticResource AppSectionTitleStyle}" />
+                        <TextBlock Text="录制或逐步编辑动作，保存宏库，再绑定到按键。" Style="{StaticResource AppCaptionStyle}" />
+                    </StackPanel>
+                    <Border Style="{StaticResource AppCardStyle}">
+                        <StackPanel Spacing="16">
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <ComboBox x:Name="MacroSelectionBox" PlaceholderText="选择一个宏" SelectionChanged="OnMacroSelectionChanged" HorizontalAlignment="Stretch" />
+                                <Button Grid.Column="1" Content="新建宏" Click="OnNewMacro" />
+                                <Button Grid.Column="2" Content="删除宏" Click="OnDeleteMacro" />
+                            </Grid>
+                            <Grid ColumnSpacing="16">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="2*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <TextBox x:Name="MacroNameBox" Header="宏名称" PlaceholderText="输入宏名称" />
+                                <ComboBox x:Name="MacroTriggerBox" Grid.Column="1" Header="触发方式" SelectedIndex="0" HorizontalAlignment="Stretch">
+                                    <ComboBoxItem Content="执行一次" Tag="Once" />
+                                    <ComboBoxItem Content="按住循环" Tag="Hold" />
+                                    <ComboBoxItem Content="切换循环" Tag="Toggle" />
+                                </ComboBox>
+                                <Button Grid.Column="2" Content="更新宏信息" Click="OnUpdateMacroMetadata" VerticalAlignment="Bottom" />
+                            </Grid>
+                            <Border Style="{StaticResource AppInsetCardStyle}" Padding="14">
+                                <StackPanel Spacing="12">
+                                    <Grid Padding="12,0" ColumnSpacing="16">
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="2*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                        <TextBlock Text="按键" Style="{StaticResource AppFieldLabelStyle}" />
+                                        <TextBlock Grid.Column="1" Text="动作" Style="{StaticResource AppFieldLabelStyle}" />
+                                        <TextBlock Grid.Column="2" Text="延时 · ms" Style="{StaticResource AppFieldLabelStyle}" />
+                                    </Grid>
+                                    <ListView x:Name="MacroStepsList" SelectionMode="Single" MinHeight="100" MaxHeight="250" Padding="0">
+                                        <ListView.ItemContainerStyle>
+                                            <Style TargetType="ListViewItem"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="36" /></Style>
+                                        </ListView.ItemContainerStyle>
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid ColumnSpacing="16" Padding="0,4">
+                                                    <Grid.ColumnDefinitions><ColumnDefinition Width="2*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Key}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding Action}" />
+                                                    <TextBlock Grid.Column="2" Text="{Binding Delay}" FontFamily="Consolas" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+                                </StackPanel>
+                            </Border>
+                            <Grid ColumnSpacing="10">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="2*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <ComboBox x:Name="MacroStepKeyBox" Header="按键" HorizontalAlignment="Stretch" IsEditable="True" PlaceholderText="选择按键" />
+                                <ComboBox x:Name="MacroStepActionBox" Grid.Column="1" Header="动作" SelectedIndex="0" HorizontalAlignment="Stretch">
+                                    <ComboBoxItem Content="按下" /><ComboBoxItem Content="抬起" />
+                                </ComboBox>
+                                <NumberBox x:Name="MacroStepDelayBox" Grid.Column="2" Header="延时 · ms" Minimum="0" Maximum="60000" Value="50" SpinButtonPlacementMode="Compact" />
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="添加动作" Click="OnAddMacroStep" />
+                                <Button Content="移除选中动作" Click="OnRemoveMacroStep" />
+                            </StackPanel>
+                            <Expander HorizontalAlignment="Stretch" Header="批量设置延时">
+                                <StackPanel Spacing="10">
+                                    <NumberBox x:Name="MacroDelayBox" Header="当前宏的每步延时 · ms" Minimum="0" Maximum="60000" Value="50" Width="240" HorizontalAlignment="Left" SpinButtonPlacementMode="Inline" />
+                                    <Button Content="应用到当前宏全部动作" Click="OnApplyMacroDelay" />
+                                </StackPanel>
+                            </Expander>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource AppCardStyle}">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="快速录制" Style="{StaticResource AppCardTitleStyle}" />
+                            <TextBlock Text="开始后在录制区输入，完成时点击停止。" Style="{StaticResource AppCaptionStyle}" />
+                            <ContentControl x:Name="MacroRecorder" IsTabStop="True" UseSystemFocusVisuals="True"
+                                            HorizontalContentAlignment="Stretch" AutomationProperties.Name="宏录制区">
+                                <Border Background="{ThemeResource ControlFillColorDefaultBrush}" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                        BorderThickness="1" CornerRadius="8" Padding="16" MinHeight="64">
+                                    <TextBlock Text="录制区 · 点击开始后在此按键，Esc 结束" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                </Border>
+                            </ContentControl>
+                            <TextBlock Text="{Binding Text, ElementName=MacroStatus}" Style="{StaticResource AppCaptionStyle}" AutomationProperties.LiveSetting="Polite" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="开始录制" Click="OnStartMacroRecording" />
+                                <Button Content="停止并生成宏" Click="OnStopMacroRecording" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource AppCardStyle}">
+                        <StackPanel Spacing="14">
+                            <TextBlock Text="保存与应用" Style="{StaticResource AppCardTitleStyle}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="保存宏库" Click="OnSaveMacros" />
+                                <Button Content="加载宏库" Click="OnLoadMacros" />
+                                <Button Content="检查宏库" Click="OnValidateMacros" />
+                                <Button Content="读取设备宏信息" Click="OnReadMacro" />
+                            </StackPanel>
+                            <TextBlock Text="上传会替换设备中的完整宏库。请先在“按键”页选择要绑定的位置。" Style="{StaticResource AppCaptionStyle}" />
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <Button x:Name="MacroUploadButton" Content="上传完整宏库" Click="OnUploadMacros" Style="{StaticResource AccentButtonStyle}" VerticalAlignment="Bottom" />
+                                <NumberBox x:Name="MacroIndexBox" Minimum="1" Maximum="255" Value="1" Width="120" Header="绑定宏序号" SpinButtonPlacementMode="Inline" />
+                                <Button x:Name="MacroBindButton" Content="绑定到选中按键" Click="OnBindMacro" VerticalAlignment="Bottom" />
+                            </StackPanel>
+                            <TextBlock x:Name="MacroStatus" TextWrapping="Wrap" Style="{StaticResource AppCaptionStyle}" />
+                            <TextBox x:Name="MacroReadResult" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" FontFamily="Consolas" Visibility="Collapsed" MaxHeight="130" />
+                        </StackPanel>
+                    </Border>
+                    <Expander HorizontalAlignment="Stretch" Header="高级 · 宏库 JSON">
+                        <StackPanel Spacing="12">
+                            <TextBox x:Name="MacroEditor" AcceptsReturn="True" TextWrapping="Wrap" FontFamily="Consolas" MinHeight="180" MaxHeight="360" />
+                            <Button Content="复制 JSON" Click="OnCopyMacros" />
+                        </StackPanel>
+                    </Expander>
+                </StackPanel>
+
+                <StackPanel x:Name="PanelProfiles" Spacing="16" Visibility="Collapsed">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="配置管理" Style="{StaticResource AppSectionTitleStyle}" />
+                        <TextBlock Text="备份灯光、逐键颜色、性能与三层按键。宏库请在“宏”页单独保存。" Style="{StaticResource AppCaptionStyle}" />
+                    </StackPanel>
+                    <Border Style="{StaticResource AppCardStyle}">
+                        <StackPanel Spacing="16">
+                            <TextBlock Text="本地配置库" Style="{StaticResource AppCardTitleStyle}" />
+                            <Grid ColumnSpacing="10">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <TextBox x:Name="ProfileNameBox" Header="配置名称" Text="我的配置" PlaceholderText="例如：日常工作、竞技游戏" />
+                                <Button Grid.Column="1" Content="保存到本地库" Click="OnSaveProfile" Style="{StaticResource AccentButtonStyle}" VerticalAlignment="Bottom" />
+                            </Grid>
+                            <Grid ColumnSpacing="10">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <ComboBox x:Name="ProfileLibraryBox" Header="已保存的配置" PlaceholderText="选择本地方案" HorizontalAlignment="Stretch" />
+                                <Button Grid.Column="1" Content="载入所选配置" Click="OnLoadProfile" VerticalAlignment="Bottom" />
+                            </Grid>
+                            <TextBlock Text="先读取当前配置，或导入文件，再保存为命名方案。应用配置仅支持相同型号。" Style="{StaticResource AppCaptionStyle}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource AppCardStyle}">
+                        <StackPanel Spacing="14">
+                            <TextBlock Text="备份与恢复" Style="{StaticResource AppCardTitleStyle}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="读取当前配置" Click="OnBackupProfile" />
+                                <Button Content="导出文件" Click="OnExportProfile" />
+                                <Button Content="导入文件" Click="OnImportProfile" />
+                            </StackPanel>
+                            <Button Content="应用已载入配置" Click="OnRestoreProfile" Style="{StaticResource AccentButtonStyle}" />
+                            <TextBlock x:Name="ProfileStatus" TextWrapping="Wrap" Style="{StaticResource AppCaptionStyle}" />
+                        </StackPanel>
+                    </Border>
+                    <Expander HorizontalAlignment="Stretch" Header="高级 · 配置 JSON">
+                        <StackPanel Spacing="12">
+                            <TextBox x:Name="ProfileEditor" AcceptsReturn="True" TextWrapping="Wrap" FontFamily="Consolas" MinHeight="160" MaxHeight="360" PlaceholderText="读取、载入或导入配置后显示" />
+                            <Button Content="复制配置 JSON" Click="OnCopyProfile" />
+                        </StackPanel>
+                    </Expander>
+                </StackPanel>
+                <!-- ============ 性能 ============ -->
+                <StackPanel x:Name="PanelPerformance" Spacing="16" Visibility="Collapsed">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="性能与连接" Style="{StaticResource AppSectionTitleStyle}" />
+                        <TextBlock Text="设置回报率、自动休眠、低延迟模式和按键行为。" Style="{StaticResource AppCaptionStyle}" />
+                    </StackPanel>
+                    <Border Style="{StaticResource AppCardStyle}">
+                        <StackPanel Spacing="14">
+                            <TextBlock Text="连接与按键行为" Style="{StaticResource AppCardTitleStyle}" />
+
+                            <Grid ColumnSpacing="24" RowSpacing="16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox x:Name="RateBox" Header="回报率" HorizontalAlignment="Stretch" />
+                                <ComboBox
+                                    x:Name="SleepBox"
+                                    Grid.Column="1"
+                                    Header="自动休眠"
+                                    HorizontalAlignment="Stretch" />
+                            </Grid>
+
+                            <ToggleSwitch
+                                x:Name="LatencySwitch"
+                                Header="Top Speed 超低延迟"
+                                OffContent="标准模式"
+                                OnContent="速度模式" />
+                            <ComboBox x:Name="Z75LatencyBox" Header="Z75 低延迟模式" Visibility="Collapsed">
+                                <ComboBoxItem Content="关闭" />
+                                <ComboBoxItem Content="标准低延迟" />
+                                <ComboBoxItem Content="速度模式" />
+                            </ComboBox>
+                            <ToggleSwitch
+                                x:Name="WinLockSwitch"
+                                Header="Win 键锁定"
+                                OffContent="正常"
+                                OnContent="已锁定" />
+                            <ToggleSwitch
+                                x:Name="MacModeSwitch"
+                                Header="Mac 模式"
+                                OffContent="Windows 布局"
+                                OnContent="Mac 布局" />
+
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="应用" Click="OnApplyPerformance" Style="{StaticResource AccentButtonStyle}" />
+                                <Button Content="读取当前设置" Click="OnReloadSettings" />
+                            </StackPanel>
+
+                            <InfoBar x:Name="PerformanceNote" IsOpen="False" IsClosable="True" />
+                        </StackPanel>
+                    </Border>
+
+                    <Expander HorizontalAlignment="Stretch" Header="高级 · 设备响应">
+                        <TextBox
+                            x:Name="PerformanceResult"
+                            IsReadOnly="True"
+                            AcceptsReturn="True"
+                            TextWrapping="Wrap"
+                            FontFamily="Consolas"
+                            MinHeight="120"
+                            PlaceholderText="点「读取当前设置」后显示" />
+                    </Expander>
+                </StackPanel>
+
+                <!-- ============ 诊断 ============ -->
+                <StackPanel x:Name="PanelDiagnostics" Spacing="16" Visibility="Collapsed">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="设备诊断" Style="{StaticResource AppSectionTitleStyle}" />
+                        <TextBlock Text="优先使用预置的只读命令；手工报文留给协议调试。" Style="{StaticResource AppCaptionStyle}" />
+                    </StackPanel>
+                    <Border Style="{StaticResource AppCardStyle}">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="读取命令" Style="{StaticResource AppCardTitleStyle}" />
+                            <Grid x:Name="CommandPanel" ColumnSpacing="8" RowSpacing="8" />
+                            <TextBox
+                                x:Name="CommandResult"
+                                IsReadOnly="True"
+                                AcceptsReturn="True"
+                                TextWrapping="Wrap"
+                                FontFamily="Consolas"
+                                MinHeight="140"
+                                PlaceholderText="回包会显示在这里" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource AppCardStyle}">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="手工发送" Style="{StaticResource AppCardTitleStyle}" />
+                            <TextBlock x:Name="RawHint" Style="{StaticResource AppCaptionStyle}" />
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox
+                                    x:Name="RawBox"
+                                    PlaceholderText="十六进制，例如 03 01 00 00"
+                                    FontFamily="Consolas" />
+                                <Button Grid.Column="1" Content="发送" Click="OnSendRaw" />
+                            </Grid>
+                            <Button Content="查看完整报文日志" Click="OnOpenConsole" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ============ 关于 ============ -->
+                <StackPanel x:Name="PanelAbout" Spacing="16" Visibility="Collapsed">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="设备与能力" Style="{StaticResource AppSectionTitleStyle}" />
+                        <TextBlock Text="查看设备信息、支持能力和官方服务。" Style="{StaticResource AppCaptionStyle}" />
+                    </StackPanel>
+                    <Border Style="{StaticResource AppCardStyle}">
+                        <StackPanel x:Name="AboutPanel" Spacing="8" />
+                    </Border>
+                    <Button Content="打开官方网页驱动" Click="OnOpenOfficialSite" />
+
+                    <Border x:Name="AudioNoteCard" Style="{StaticResource AppCardStyle}" Visibility="Collapsed">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="音效功能说明" Style="{StaticResource AppCardTitleStyle}" />
+                            <TextBlock
+                                Style="{StaticResource AppBodyStyle}"
+                                Text="EQ、Xear 环绕、Virtual Bass、麦克风降噪由 C-Media 的内核驱动与音频处理对象（APO）完成，纯 HID 应用访问不到。" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="打开系统声音设置" Click="OnOpenSoundSettings" />
+                                <Button Content="官网下载客户端" Click="OnOpenOfficialSite" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <InfoBar
+                        IsOpen="True"
+                        IsClosable="False"
+                        Severity="Warning"
+                        Title="固件升级未实现"
+                        Message="键盘及接收器固件升级暂未实现，请使用官方驱动。本应用不进行固件刷写。" />
+                </StackPanel>
+
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</Page>

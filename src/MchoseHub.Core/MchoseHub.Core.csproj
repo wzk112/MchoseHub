@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>MchoseHub.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\keyboard-models.json" />
+    <EmbeddedResource Include="Resources\keyboard-functions.json" />
+    <EmbeddedResource Include="Resources\keyboard-factory.json" />
+  </ItemGroup>
+
+</Project>

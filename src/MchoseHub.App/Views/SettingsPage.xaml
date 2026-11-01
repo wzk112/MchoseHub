@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="MchoseHub.App.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ScrollViewer
+        Padding="{StaticResource PagePadding}"
+        HorizontalScrollMode="Disabled"
+        HorizontalScrollBarVisibility="Disabled">
+        <StackPanel
+            Spacing="16"
+            MaxWidth="{StaticResource ContentMaxWidth}"
+            HorizontalAlignment="Stretch">
+            <StackPanel.ChildrenTransitions>
+                <TransitionCollection>
+                    <EntranceThemeTransition FromVerticalOffset="24" />
+                </TransitionCollection>
+            </StackPanel.ChildrenTransitions>
+
+            <StackPanel Spacing="4" Margin="0,0,0,4">
+                <TextBlock Text="应用设置" FontSize="28" Style="{StaticResource TitleTextBlockStyle}" />
+                <TextBlock Style="{StaticResource AppCaptionStyle}" Text="设置界面主题、自动重连和日志。" />
+            </StackPanel>
+
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Style="{StaticResource AppCardStyle}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Image Source="{ThemeResource HubAppearanceIconSource}" Width="22" Height="22" />
+                            <TextBlock Text="外观" Style="{StaticResource AppCardTitleStyle}" />
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource AppCaptionStyle}" Text="选择控制台主题。跟随系统会自动适配浅色、深色和高对比度模式。" />
+                        <RadioButtons x:Name="ThemeSelector" SelectionChanged="OnThemeChanged">
+                            <x:String>跟随系统</x:String>
+                            <x:String>浅色</x:String>
+                            <x:String>深色</x:String>
+                        </RadioButtons>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Style="{StaticResource AppCardStyle}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Image Source="{ThemeResource HubReconnectIconSource}" Width="22" Height="22" />
+                            <TextBlock Text="设备连接" Style="{StaticResource AppCardTitleStyle}" />
+                        </StackPanel>
+                        <TextBlock
+                            Style="{StaticResource AppCaptionStyle}"
+                            Text="设备断开后自动尝试重新连接。" />
+                        <ToggleSwitch
+                            x:Name="AutoReconnectSwitch"
+                            Header="自动重连"
+                            OnContent="已开启"
+                            OffContent="已关闭"
+                            Toggled="OnAutoReconnectToggled" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Border Style="{StaticResource AppCardStyle}">
+                <Grid ColumnSpacing="24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="日志与故障排查" Style="{StaticResource AppCardTitleStyle}" />
+                        <TextBlock Style="{StaticResource AppCaptionStyle}" Text="查看设备通信日志和应用崩溃记录。" />
+                        <TextBlock x:Name="LogPathText" Style="{StaticResource AppCaptionStyle}" FontFamily="Consolas" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center" MinWidth="140">
+                        <Button Content="打开日志目录" Click="OnOpenLogFolder" HorizontalAlignment="Stretch" />
+                        <Button Content="查看崩溃日志" Click="OnOpenCrashLog" HorizontalAlignment="Stretch" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Expander Header="协议与设备表" HorizontalAlignment="Stretch">
+                <Border Style="{StaticResource AppInsetCardStyle}" Margin="0,8,0,0">
+                    <StackPanel Spacing="8">
+                        <TextBlock x:Name="CatalogText" Style="{StaticResource AppBodyStyle}" />
+                        <TextBlock
+                            Style="{StaticResource AppCaptionStyle}"
+                            Text="键盘走 feature report（reportId 0x06，519 字节载荷）；音频设备走 output report。第二代结构化帧以 0xAA 开头并带 XOR 校验。" />
+                        <TextBlock
+                            Style="{StaticResource AppCaptionStyle}"
+                            Text="仍未验证：部分结构化回包字段、各机型固件版本读取命令，以及键鼠族的 0xAF / 0xAA 五字节头协议。" />
+                    </StackPanel>
+                </Border>
+            </Expander>
+
+            <Border Style="{StaticResource AppCardStyle}">
+                <Grid ColumnSpacing="18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="48" Height="48" CornerRadius="12" Background="{ThemeResource AccentFillColorTertiaryBrush}">
+                        <Image Source="{ThemeResource HubInfoIconSource}" Width="26" Height="26" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                        <TextBlock Text="MCHOSE 设备控制台" Style="{StaticResource AppCardTitleStyle}" />
+                        <TextBlock Style="{StaticResource AppCaptionStyle}" Text="第三方配置客户端，与迈从科技无关联。" />
+                    </StackPanel>
+                    <Border Grid.Column="2" Style="{StaticResource AppPillStyle}" VerticalAlignment="Center">
+                        <TextBlock Text="1.0.0" Style="{StaticResource CaptionTextBlockStyle}" />
+                    </Border>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

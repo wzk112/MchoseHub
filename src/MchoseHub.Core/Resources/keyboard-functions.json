@@ -1,0 +1,1824 @@
+{
+  "source": "https://www.mchose.com.cn/assets/purify.es-CjFXZAJq.js",
+  "fetched": "2026-10-05",
+  "functions": [
+    {
+      "name": "Esc",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        41
+      ]
+    },
+    {
+      "name": "F1",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        58
+      ]
+    },
+    {
+      "name": "F2",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        59
+      ]
+    },
+    {
+      "name": "F3",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        60
+      ]
+    },
+    {
+      "name": "F4",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        61
+      ]
+    },
+    {
+      "name": "F5",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        62
+      ]
+    },
+    {
+      "name": "F6",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        63
+      ]
+    },
+    {
+      "name": "F7",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        64
+      ]
+    },
+    {
+      "name": "F8",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        65
+      ]
+    },
+    {
+      "name": "F9",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        66
+      ]
+    },
+    {
+      "name": "F10",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        67
+      ]
+    },
+    {
+      "name": "F11",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        68
+      ]
+    },
+    {
+      "name": "F12",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        69
+      ]
+    },
+    {
+      "name": "Print",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        70
+      ]
+    },
+    {
+      "name": "Scroll",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        71
+      ]
+    },
+    {
+      "name": "Pause",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        72
+      ]
+    },
+    {
+      "name": "` ～",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        53
+      ]
+    },
+    {
+      "name": "1 !",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        30
+      ]
+    },
+    {
+      "name": "2 @",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        31
+      ]
+    },
+    {
+      "name": "3 #",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        32
+      ]
+    },
+    {
+      "name": "4 $",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        33
+      ]
+    },
+    {
+      "name": "5 %",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        34
+      ]
+    },
+    {
+      "name": "6 ^",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        35
+      ]
+    },
+    {
+      "name": "7 &",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        36
+      ]
+    },
+    {
+      "name": "8 *",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        37
+      ]
+    },
+    {
+      "name": "9 (",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        38
+      ]
+    },
+    {
+      "name": "0 )",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        39
+      ]
+    },
+    {
+      "name": "- _",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        45
+      ]
+    },
+    {
+      "name": "= +",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        46
+      ]
+    },
+    {
+      "name": "Backspace",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        42
+      ]
+    },
+    {
+      "name": "Insert",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        73
+      ]
+    },
+    {
+      "name": "Home",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        74
+      ]
+    },
+    {
+      "name": "PgUp",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        75
+      ]
+    },
+    {
+      "name": "Num Lock",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        83
+      ]
+    },
+    {
+      "name": "Num /",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        84
+      ]
+    },
+    {
+      "name": "Num *",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        85
+      ]
+    },
+    {
+      "name": "Num -",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        86
+      ]
+    },
+    {
+      "name": "Tab",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        43
+      ]
+    },
+    {
+      "name": "Q",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        20
+      ]
+    },
+    {
+      "name": "W",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        26
+      ]
+    },
+    {
+      "name": "E",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        8
+      ]
+    },
+    {
+      "name": "R",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        21
+      ]
+    },
+    {
+      "name": "T",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        23
+      ]
+    },
+    {
+      "name": "Y",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        28
+      ]
+    },
+    {
+      "name": "U",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        24
+      ]
+    },
+    {
+      "name": "I",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        12
+      ]
+    },
+    {
+      "name": "O",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        18
+      ]
+    },
+    {
+      "name": "P",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        19
+      ]
+    },
+    {
+      "name": "[ {",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        47
+      ]
+    },
+    {
+      "name": "] }",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        48
+      ]
+    },
+    {
+      "name": "\\ |",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        49
+      ]
+    },
+    {
+      "name": "Delete",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        76
+      ]
+    },
+    {
+      "name": "End",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        77
+      ]
+    },
+    {
+      "name": "PgDn",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        78
+      ]
+    },
+    {
+      "name": "Num 7",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        95
+      ]
+    },
+    {
+      "name": "Num 8",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        96
+      ]
+    },
+    {
+      "name": "Num 9",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        97
+      ]
+    },
+    {
+      "name": "Num +",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        87
+      ]
+    },
+    {
+      "name": "Caps",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        57
+      ]
+    },
+    {
+      "name": "A",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        4
+      ]
+    },
+    {
+      "name": "S",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        22
+      ]
+    },
+    {
+      "name": "D",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        7
+      ]
+    },
+    {
+      "name": "F",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        9
+      ]
+    },
+    {
+      "name": "G",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        10
+      ]
+    },
+    {
+      "name": "H",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        11
+      ]
+    },
+    {
+      "name": "J",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        13
+      ]
+    },
+    {
+      "name": "K",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        14
+      ]
+    },
+    {
+      "name": "L",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        15
+      ]
+    },
+    {
+      "name": "; :",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        51
+      ]
+    },
+    {
+      "name": "‘ ”",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        52
+      ]
+    },
+    {
+      "name": "Enter",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        40
+      ]
+    },
+    {
+      "name": "Num 4",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        92
+      ]
+    },
+    {
+      "name": "Num 5",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        93
+      ]
+    },
+    {
+      "name": "Num 6",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        94
+      ]
+    },
+    {
+      "name": "Left Shift",
+      "group": "key",
+      "value": [
+        0,
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Z",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        29
+      ]
+    },
+    {
+      "name": "X",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        27
+      ]
+    },
+    {
+      "name": "C",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        6
+      ]
+    },
+    {
+      "name": "V",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        25
+      ]
+    },
+    {
+      "name": "B",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        5
+      ]
+    },
+    {
+      "name": "N",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        17
+      ]
+    },
+    {
+      "name": "M",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        16
+      ]
+    },
+    {
+      "name": ", <",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        54
+      ]
+    },
+    {
+      "name": ". >",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        55
+      ]
+    },
+    {
+      "name": "/ ?",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        56
+      ]
+    },
+    {
+      "name": "Right Shift",
+      "group": "key",
+      "value": [
+        0,
+        32,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "↑",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        82
+      ]
+    },
+    {
+      "name": "Num 1",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        89
+      ]
+    },
+    {
+      "name": "Num 2",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        90
+      ]
+    },
+    {
+      "name": "Num 3",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        91
+      ]
+    },
+    {
+      "name": "Num Enter",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        88
+      ]
+    },
+    {
+      "name": "Left Ctrl",
+      "group": "key",
+      "value": [
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Left Win",
+      "group": "key",
+      "value": [
+        0,
+        8,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Left Alt",
+      "group": "key",
+      "value": [
+        0,
+        4,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Space",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        44
+      ]
+    },
+    {
+      "name": "Right Alt",
+      "group": "key",
+      "value": [
+        0,
+        64,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Right Win",
+      "group": "key",
+      "value": [
+        0,
+        128,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Menu",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        101
+      ]
+    },
+    {
+      "name": "Right Ctrl",
+      "group": "key",
+      "value": [
+        0,
+        16,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "←",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        80
+      ]
+    },
+    {
+      "name": "↓",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        81
+      ]
+    },
+    {
+      "name": "→",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        79
+      ]
+    },
+    {
+      "name": "Num 0",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        98
+      ]
+    },
+    {
+      "name": "Num Del",
+      "group": "key",
+      "value": [
+        0,
+        0,
+        0,
+        99
+      ]
+    },
+    {
+      "name": "keyboard.left",
+      "group": "mouse",
+      "value": [
+        1,
+        1,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "keyboard.right",
+      "group": "mouse",
+      "value": [
+        1,
+        2,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "keyboard.mid",
+      "group": "mouse",
+      "value": [
+        1,
+        3,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "keyboard.mForward",
+      "group": "mouse",
+      "value": [
+        1,
+        5,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "keyboard.mRetreat",
+      "group": "mouse",
+      "value": [
+        1,
+        4,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "keyboard.scrollUp",
+      "group": "mouse",
+      "value": [
+        1,
+        8,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "keyboard.scrollDown",
+      "group": "mouse",
+      "value": [
+        1,
+        9,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "mouse.playPause",
+      "group": "media",
+      "value": [
+        2,
+        0,
+        0,
+        205
+      ]
+    },
+    {
+      "name": "mouse.silence",
+      "group": "media",
+      "value": [
+        2,
+        0,
+        0,
+        226
+      ]
+    },
+    {
+      "name": "mouse.stopPlaying",
+      "group": "media",
+      "value": [
+        2,
+        0,
+        0,
+        183
+      ]
+    },
+    {
+      "name": "mouse.previousSong",
+      "group": "media",
+      "value": [
+        2,
+        0,
+        0,
+        182
+      ]
+    },
+    {
+      "name": "mouse.nextSong",
+      "group": "media",
+      "value": [
+        2,
+        0,
+        0,
+        181
+      ]
+    },
+    {
+      "name": "mouse.volumeUp",
+      "group": "media",
+      "value": [
+        2,
+        0,
+        0,
+        233
+      ]
+    },
+    {
+      "name": "mouse.volumeDown",
+      "group": "media",
+      "value": [
+        2,
+        0,
+        0,
+        234
+      ]
+    },
+    {
+      "name": "mouse.zoomOut",
+      "group": "system",
+      "value": [
+        0,
+        1,
+        45,
+        0
+      ]
+    },
+    {
+      "name": "mouse.zoomIn",
+      "group": "system",
+      "value": [
+        0,
+        1,
+        46,
+        0
+      ]
+    },
+    {
+      "name": "mouse.resetting",
+      "group": "system",
+      "value": [
+        0,
+        1,
+        39,
+        0
+      ]
+    },
+    {
+      "name": "mouse.recover",
+      "group": "system",
+      "value": [
+        0,
+        1,
+        28,
+        0
+      ]
+    },
+    {
+      "name": "mouse.repeal",
+      "group": "system",
+      "value": [
+        0,
+        1,
+        29,
+        0
+      ]
+    },
+    {
+      "name": "mouse.selectAll",
+      "group": "system",
+      "value": [
+        0,
+        1,
+        4,
+        0
+      ]
+    },
+    {
+      "name": "mouse.new",
+      "group": "system",
+      "value": [
+        0,
+        1,
+        17,
+        0
+      ]
+    },
+    {
+      "name": "mouse.copy",
+      "group": "system",
+      "value": [
+        0,
+        1,
+        6,
+        0
+      ]
+    },
+    {
+      "name": "mouse.cut",
+      "group": "system",
+      "value": [
+        0,
+        1,
+        27,
+        0
+      ]
+    },
+    {
+      "name": "mouse.paste",
+      "group": "system",
+      "value": [
+        0,
+        1,
+        25,
+        0
+      ]
+    },
+    {
+      "name": "mouse.save",
+      "group": "system",
+      "value": [
+        0,
+        1,
+        22,
+        0
+      ]
+    },
+    {
+      "name": "mouse.open",
+      "group": "system",
+      "value": [
+        0,
+        1,
+        18,
+        0
+      ]
+    },
+    {
+      "name": "mouse.newItem",
+      "group": "system",
+      "value": [
+        0,
+        1,
+        23,
+        0
+      ]
+    },
+    {
+      "name": "mouse.closeItem",
+      "group": "system",
+      "value": [
+        0,
+        1,
+        26,
+        0
+      ]
+    },
+    {
+      "name": "keyboard.retreat",
+      "group": "system",
+      "value": [
+        0,
+        4,
+        80,
+        0
+      ]
+    },
+    {
+      "name": "keyboard.forward",
+      "group": "system",
+      "value": [
+        0,
+        4,
+        79,
+        0
+      ]
+    },
+    {
+      "name": "mouse.taskbar",
+      "group": "system",
+      "value": [
+        0,
+        8,
+        43,
+        0
+      ]
+    },
+    {
+      "name": "mouse.openNarrative",
+      "group": "system",
+      "value": [
+        0,
+        9,
+        88,
+        0
+      ]
+    },
+    {
+      "name": "mouse.loopApplication",
+      "group": "system",
+      "value": [
+        0,
+        8,
+        23,
+        0
+      ]
+    },
+    {
+      "name": "mouse.actionCenter",
+      "group": "system",
+      "value": [
+        0,
+        8,
+        4,
+        0
+      ]
+    },
+    {
+      "name": "mouse.fileExplorer",
+      "group": "system",
+      "value": [
+        0,
+        8,
+        8,
+        0
+      ]
+    },
+    {
+      "name": "mouse.winSettingsCenter",
+      "group": "system",
+      "value": [
+        0,
+        8,
+        12,
+        0
+      ]
+    },
+    {
+      "name": "keyboard.lockComputer",
+      "group": "system",
+      "value": [
+        0,
+        8,
+        15,
+        0
+      ]
+    },
+    {
+      "name": "mouse.projectToOtherDevices",
+      "group": "system",
+      "value": [
+        0,
+        8,
+        14,
+        0
+      ]
+    },
+    {
+      "name": "mouse.jumpToTray",
+      "group": "system",
+      "value": [
+        0,
+        8,
+        5,
+        0
+      ]
+    },
+    {
+      "name": "mouse.launchXboxGameBar",
+      "group": "system",
+      "value": [
+        0,
+        8,
+        10,
+        0
+      ]
+    },
+    {
+      "name": "mouse.operation",
+      "group": "system",
+      "value": [
+        0,
+        8,
+        21,
+        0
+      ]
+    },
+    {
+      "name": "mouse.search",
+      "group": "system",
+      "value": [
+        0,
+        8,
+        22,
+        0
+      ]
+    },
+    {
+      "name": "mouse.displaySetting",
+      "group": "system",
+      "value": [
+        0,
+        8,
+        24,
+        0
+      ]
+    },
+    {
+      "name": "mouse.simpleMenu",
+      "group": "system",
+      "value": [
+        0,
+        8,
+        27,
+        0
+      ]
+    },
+    {
+      "name": "mouse.emojiBox",
+      "group": "system",
+      "value": [
+        0,
+        8,
+        55,
+        0
+      ]
+    },
+    {
+      "name": "mouse.startMenu",
+      "group": "system",
+      "value": [
+        0,
+        1,
+        0,
+        41
+      ]
+    },
+    {
+      "name": "keyboard.conversionWindow",
+      "group": "system",
+      "value": [
+        0,
+        4,
+        43,
+        0
+      ]
+    },
+    {
+      "name": "keyboard.closeWindow",
+      "group": "system",
+      "value": [
+        0,
+        4,
+        61,
+        0
+      ]
+    },
+    {
+      "name": "mouse.endApplication",
+      "group": "system",
+      "value": [
+        0,
+        4,
+        61,
+        0
+      ]
+    },
+    {
+      "name": "mouse.switchNextApplication",
+      "group": "system",
+      "value": [
+        0,
+        4,
+        41,
+        0
+      ]
+    },
+    {
+      "name": "keyboard.browserHome",
+      "group": "system",
+      "value": [
+        2,
+        0,
+        2,
+        35
+      ]
+    },
+    {
+      "name": "keyboard.calculator",
+      "group": "system",
+      "value": [
+        2,
+        0,
+        1,
+        146
+      ]
+    },
+    {
+      "name": "keyboard.email",
+      "group": "system",
+      "value": [
+        2,
+        0,
+        1,
+        138
+      ]
+    },
+    {
+      "name": "keyboard.myComputer",
+      "group": "system",
+      "value": [
+        2,
+        0,
+        1,
+        148
+      ]
+    },
+    {
+      "name": "keyboard.favorites",
+      "group": "system",
+      "value": [
+        2,
+        0,
+        2,
+        42
+      ]
+    },
+    {
+      "name": "keyboard.showDesktop",
+      "group": "system",
+      "value": [
+        0,
+        8,
+        7,
+        0
+      ]
+    },
+    {
+      "name": "keyboard.windowsSecurity",
+      "group": "system",
+      "value": [
+        0,
+        5,
+        76,
+        0
+      ]
+    },
+    {
+      "name": "mouse.taskManager",
+      "group": "system",
+      "value": [
+        0,
+        3,
+        41,
+        0
+      ]
+    },
+    {
+      "name": "mouse.screenBrightUp",
+      "group": "system",
+      "value": [
+        2,
+        0,
+        0,
+        111
+      ]
+    },
+    {
+      "name": "mouse.screenBrightDown",
+      "group": "system",
+      "value": [
+        2,
+        0,
+        0,
+        112
+      ]
+    },
+    {
+      "name": "keyboard.fnLayer",
+      "group": "system",
+      "value": [
+        13,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "keyboard.fn2Layer",
+      "group": "system",
+      "value": [
+        13,
+        1,
+        0,
+        0
+      ]
+    }
+  ],
+  "macroKeys": {
+    "0": 39,
+    "1": 30,
+    "2": 31,
+    "3": 32,
+    "4": 33,
+    "5": 34,
+    "6": 35,
+    "7": 36,
+    "8": 37,
+    "9": 38,
+    "-": 45,
+    ",": 54,
+    ";": 51,
+    ".": 55,
+    "'": 52,
+    "[": 47,
+    "]": 48,
+    "/": 56,
+    "`": 53,
+    "=": 46,
+    "a": 4,
+    "b": 5,
+    "c": 6,
+    "d": 7,
+    "e": 8,
+    "f": 9,
+    "g": 10,
+    "h": 11,
+    "i": 12,
+    "j": 13,
+    "k": 14,
+    "l": 15,
+    "m": 16,
+    "n": 17,
+    "o": 18,
+    "p": 19,
+    "q": 20,
+    "r": 21,
+    "s": 22,
+    "t": 23,
+    "u": 24,
+    "v": 25,
+    "w": 26,
+    "x": 27,
+    "y": 28,
+    "z": 29,
+    "A": 4,
+    "B": 5,
+    "C": 6,
+    "D": 7,
+    "E": 8,
+    "F": 9,
+    "G": 10,
+    "H": 11,
+    "I": 12,
+    "J": 13,
+    "K": 14,
+    "L": 15,
+    "M": 16,
+    "N": 17,
+    "O": 18,
+    "P": 19,
+    "Q": 20,
+    "R": 21,
+    "S": 22,
+    "T": 23,
+    "U": 24,
+    "V": 25,
+    "W": 26,
+    "X": 27,
+    "Y": 28,
+    "Z": 29,
+    "Backspace": 42,
+    "CapsLock": 57,
+    "Delete": 76,
+    "Down": 81,
+    "End": 77,
+    "Enter": 40,
+    "Esc": 41,
+    "F1": 58,
+    "F2": 59,
+    "F3": 60,
+    "F4": 61,
+    "F5": 62,
+    "F6": 63,
+    "F7": 64,
+    "F8": 65,
+    "F9": 66,
+    "F10": 67,
+    "F11": 68,
+    "F12": 69,
+    "Home": 74,
+    "Insert": 73,
+    "Left": 80,
+    "Num -": 86,
+    "Num *": 85,
+    "Num /": 84,
+    "Num +": 87,
+    "Num 0": 98,
+    "Num 1": 89,
+    "Num 2": 90,
+    "Num 3": 91,
+    "Num 4": 92,
+    "Num 5": 93,
+    "Num 6": 94,
+    "Num 7": 95,
+    "Num 8": 96,
+    "Num 9": 97,
+    "Num Del": 99,
+    "Num Enter": 88,
+    "Num Lock": 83,
+    "Page Down": 78,
+    "Page Up": 75,
+    "Pause": 72,
+    "Right": 79,
+    "ShiftLeft": 225,
+    "ShiftRight": 229,
+    "ControlLeft": 224,
+    "ControlRight": 228,
+    "AltLeft": 226,
+    "AltRight": 230,
+    "WinLeft": 227,
+    "WinRight": 231,
+    "ScrollLock": 71,
+    " ": 44,
+    "Space": 44,
+    "Tab": 43,
+    "Up": 82,
+    "ArrowRight": 79,
+    "ArrowLeft": 80,
+    "ArrowDown": 81,
+    "ArrowUp": 82,
+    "+": 52,
+    "Escape": 41,
+    "PageUp": 75,
+    "PageDown": 78,
+    "\\": 49,
+    "NumLock": 83,
+    "PrintScreen": 70,
+    "Menu": 101,
+    "Numpad0": 98,
+    "Numpad1": 89,
+    "Numpad2": 90,
+    "Numpad3": 91,
+    "Numpad4": 92,
+    "Numpad5": 93,
+    "Numpad6": 94,
+    "Numpad7": 95,
+    "Numpad8": 96,
+    "Numpad9": 97,
+    "NumpadAdd": 87,
+    "NumpadSubtract": 86,
+    "NumpadMultiply": 85,
+    "NumpadDivide": 84,
+    "NumpadDecimal": 99,
+    "NumpadEnter": 88
+  }
+}
