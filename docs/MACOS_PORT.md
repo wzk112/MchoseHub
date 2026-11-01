@@ -2,6 +2,12 @@
 
 更新：2026-11-02。仓库新增 [Swift 原生 macOS 版](../macos/README.md)，覆盖现有 Windows 客户端的键盘、宏、配置和音频 HID 功能入口。Core 在本机通过 64 项检查，Swift 通过 31 项检查；18 型号恢复报文、宏与 60 组无线分包均以 C# 为逐字节对照，JSON 已完成 C# → Swift → C# 往返。按本次用户设备条件，先在 **K87 2.4G** 完成双次全量备份及亮度、休眠、单键的可恢复实测，全部已解析字段恢复一致。USB 有线和其余硬件范围尚待实测，详见 [验证记录](../macos/VALIDATION.md)。下方保留首次 USB 移植的实施流程。
 
+## 安装、使用与图标
+
+直接使用请阅读 [macOS 使用说明](../macos/README.md)，其中包含获取 Actions 构建包、输入监控授权、独立预览、配置备份、CLI 和源码构建步骤。原生应用不需要 .NET 运行时；.NET 8 仅用于下文的 C# 参考测试。
+
+原生图标的矢量源文件为 [AppIcon.svg](../macos/Assets/AppIcon.svg)，生成脚本为 [`macos/tools/generate-icon.sh`](../macos/tools/generate-icon.sh)。打包脚本自动把 ICNS 接入应用。
+
 ## 现有内容如何复用
 
 | 内容 | 处理方式 |
@@ -9,7 +15,7 @@
 | `src/MchoseHub.Core/Protocol`、`Resources` | 复用型号 JSON、字段布局、命令、功能码、灯效和宏编码规则。K87 使用现有 schema，不能套用磁轴型号或假设存在多个板载槽。 |
 | `src/MchoseHub.Core/Services` | 复用配置校验、三层按键、完整恢复比对、宏录制边界与失败后缓存失效规则。 |
 | `KeyboardProfile`、`KeyboardProfileLibrary` | 保持 JSON 的版本、型号、Numbers/Buffers/Tables 及三层顺序，保留字节数组的序列化格式和未知保留字节；用双向导入导出验证兼容。配置不包含完整宏库。 |
-| `tests/MchoseHub.Tests` | 仅依赖 Core，当前 Windows 离线基线为 64 项通过；可在 Mac 上先运行，再作为 Swift 实现的逐字节对照。尚未在 Mac 上跑过。 |
+| `tests/MchoseHub.Tests` | 仅依赖 Core；64 项已在本机 macOS 运行通过，并作为 Swift 逐字节对照的参考。 |
 | `MchoseHub.App` | WinUI / Windows App SDK 界面、窗口处理和键盘录制入口需要重新实现。 |
 | `MchoseHub.Platform.Windows`、`MchoseHub.Cli` | SetupAPI、hid.dll、Win32 句柄及当前 CLI 入口依赖 Windows，需要新增 Mac 传输和入口。 |
 

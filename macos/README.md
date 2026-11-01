@@ -1,6 +1,14 @@
 # MCHOSE HUB · Swift 原生版
 
+<img src="Assets/AppIcon.svg" width="128" height="128" alt="MCHOSE HUB macOS 图标" />
+
 使用 Swift 6、SwiftUI、AppKit、IOKit 实现现有 Windows 客户端的功能，不依赖 C#/.NET 运行时。最低部署目标 macOS 14；当前构建及运行环境为 Apple Silicon、macOS 27.2。
+
+## 获取应用
+
+在仓库的 [macOS Actions 构建](https://github.com/wzk112/MchoseHub/actions/workflows/macos.yml)页面选择成功的运行，在 Artifacts 中下载对应架构的包（`ARM64` 为 Apple Silicon，`X64` 为 Intel）。先解开 GitHub 下载的 artifact ZIP，再解开其中的 `MchoseHub-macOS-*.zip`；内部 ZIP 会保留应用的执行权限。
+
+将 `MCHOSE HUB.app` 拖到“应用程序”，再从那里启动。CLI 可连同旁边的 `MchoseHubMac_MchoseCore.bundle` 保留在解压目录。当前包采用 ad-hoc 签名，尚未做 Developer ID 签名或公证；macOS 可能阻止直接打开，适合需要明确了解验证范围的开发与测试使用。没有已发布安装包时可按下方步骤从源码构建。
 
 ## 功能
 
@@ -20,7 +28,7 @@
 
 ## 使用
 
-打开 `MCHOSE HUB.app`。首次访问 HID 输入报告时，macOS 可能要求在“系统设置 → 隐私与安全性 → 输入监控”中允许此应用，之后退出并重新打开。应用不会自动修改系统权限。独立预览和本地编辑不需要该权限。
+打开 `MCHOSE HUB.app`。首次访问 HID 输入报告时，macOS 可能要求在“系统设置 → 隐私与安全性 → 输入监控”中允许此应用，之后退出并重新打开。若列表中没有 MCHOSE HUB，点击“＋”并选择已放到“应用程序”的 app。应用不会自动修改系统权限。独立预览和本地编辑不需要该权限。
 
 左侧选择设备，点击“读取完整配置”。读取顺序为电量、性能、灯色、DIY、Default/Fn/Fn2，每块要求连续两份一致，再做第二次全量读取比较。编辑后通过“应用当前草稿到设备”写入，确认框会说明备份和写入行为。恢复前备份保存在本机 `Library/Application Support/MchoseHub/backups/`。
 
@@ -38,9 +46,11 @@ CLI 与旁边的 `MchoseHubMac_MchoseCore.bundle` 必须放在同一目录：
 ./mchose restore --device ID --profile target.json --backup /absolute/path/new-before.json --experimental-writes
 ```
 
-输出路径必须不存在。备份目录包含兼容 Windows 的 `profile.json`、配置请求/回包、设备描述符及本机环境记录。2.4G 另外保存原始分包；失败也保留已收到的原始资料。真实设备标识、报告和备份只应保留在本地，不提交仓库。
+`backup --out`、`roundtrip --out` 和恢复前 `--backup` 的输出路径必须不存在。备份目录包含兼容 Windows 的 `profile.json`、配置请求/回包、设备描述符及本机环境记录。2.4G 另外保存原始分包；失败也保留已收到的原始资料。真实设备标识、报告和备份只应保留在本地，不提交仓库。
 
 ## 从源码构建
+
+安装 Xcode 或提供 Swift 6 的 Command Line Tools，先用 `swift --version` 确认工具链版本。在仓库根目录执行；仅构建和运行 Swift 应用不需要 .NET。下面命令中 `new-package` 必须是尚未存在的输出目录。
 
 ```sh
 python3 tools/sync-macos-resources.py --check
@@ -67,3 +77,16 @@ dotnet run --project ../tools/MchoseHub.MacFixtures -c Release -- --validate /tm
 ```
 
 CI 检查资源与 fixtures 同步、运行 Core 和 Swift 测试、验证双向 JSON 兼容、构建原生 app 和 CLI。CI 不访问真实设备。
+
+## SVG 图标
+
+图标源文件为 [`Assets/AppIcon.svg`](Assets/AppIcon.svg)，仅使用矢量路径、渐变和阴影，没有嵌入位图、字体或外部资源。仓库同时保留生成的 [`AppIcon.icns`](Assets/AppIcon.icns) 和 [PNG 预览](Assets/AppIcon-preview.png)。应用打包时复制 ICNS，并在 `Info.plist` 注册图标；普通构建不需要图形转换工具。
+
+修改 SVG 后，在 Mac 上重新生成各尺寸图标：
+
+```sh
+brew install librsvg
+bash macos/tools/generate-icon.sh
+```
+
+此命令需在仓库根目录执行，生成 16–1024 像素的标准 macOS iconset，再用系统 `iconutil` 合并。修改图标后重新运行打包脚本即可。

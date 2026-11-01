@@ -27,7 +27,9 @@ jobs:
           dotnet run --project ../tools/MchoseHub.MacFixtures -c Release -- --validate "$RUNNER_TEMP/swift-profile.json"
       - name: Build app and CLI
         run: bash macos/build-app.sh artifacts/macos
+      - name: Archive macOS bundle with executable permissions
+        run: ditto -c -k --sequesterRsrc --keepParent artifacts/macos "artifacts/MchoseHub-macOS-$(uname -m).zip"
       - uses: actions/upload-artifact@v4
         with:
-          name: MchoseHub-macOS-developer-preview
-          path: artifacts/macos
+          name: MchoseHub-macOS-${{ runner.arch }}
+          path: artifacts/MchoseHub-macOS-*.zip

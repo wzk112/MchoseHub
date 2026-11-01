@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" role="img" aria-labelledby="title description">
+  <title id="title">MCHOSE HUB for macOS</title>
+  <desc id="description">A luminous M on a graphite blue keycap, with a mint spacebar and connection indicator.</desc>
+  <defs>
+    <linearGradient id="tile" x1="152" y1="80" x2="860" y2="944" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#243C5C"/>
+      <stop offset="0.52" stop-color="#142840"/>
+      <stop offset="1" stop-color="#0A172B"/>
+    </linearGradient>
+    <linearGradient id="keyEdge" x1="304" y1="218" x2="720" y2="836" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#526C87"/>
+      <stop offset="0.5" stop-color="#28415E"/>
+      <stop offset="1" stop-color="#102238"/>
+    </linearGradient>
+    <linearGradient id="keyFace" x1="288" y1="236" x2="760" y2="790" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#35516F"/>
+      <stop offset="0.5" stop-color="#233C58"/>
+      <stop offset="1" stop-color="#172D47"/>
+    </linearGradient>
+    <linearGradient id="letter" x1="328" y1="360" x2="696" y2="624" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#C7E9F3"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="336" y1="716" x2="688" y2="716" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8BF2D4"/>
+      <stop offset="1" stop-color="#65C9ED"/>
+    </linearGradient>
+    <filter id="shadow" x="0" y="0" width="1024" height="1024" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#020B19" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <rect x="80" y="80" width="864" height="864" rx="196" fill="url(#tile)"/>
+  </g>
+  <rect x="81.5" y="81.5" width="861" height="861" rx="194.5" stroke="#FFFFFF" stroke-opacity="0.17" stroke-width="3"/>
+  <rect x="204" y="234" width="616" height="614" rx="124" fill="#030E20" fill-opacity="0.32"/>
+  <rect x="204" y="210" width="616" height="614" rx="124" fill="url(#keyEdge)"/>
+  <rect x="216" y="218" width="592" height="582" rx="114" fill="url(#keyFace)"/>
+  <path d="M330 222H694C754 222 802 270 802 330" stroke="#FFFFFF" stroke-opacity="0.16" stroke-width="3" stroke-linecap="round"/>
+  <path d="M324 624V368L512 558L700 368V624" stroke="#08192D" stroke-opacity="0.4" stroke-width="76" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 8)"/>
+  <path d="M324 616V360L512 550L700 360V616" stroke="url(#letter)" stroke-width="72" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="336" y="708" width="352" height="32" rx="16" fill="#08192D" fill-opacity="0.55"/>
+  <rect x="336" y="700" width="352" height="32" rx="16" fill="url(#accent)"/>
+  <circle cx="730" cy="288" r="10" fill="#8BF2D4"/>
+  <circle cx="730" cy="288" r="5" fill="#D9FFF2"/>
+</svg>

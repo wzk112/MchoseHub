@@ -1,10 +1,29 @@
 # MCHOSE HUB 原生客户端
 
-2026-11-01 R2。适用于 Windows x64，重点支持 K87 有线和 2.4G 配置。
+2026-11-02。提供 Windows x64 客户端及 Swift 原生 macOS 开发版。
+
+<img src="macos/Assets/AppIcon.svg" width="128" height="128" alt="MCHOSE HUB macOS 图标" />
 
 Windows 客户端使用原生 WinUI 3。仓库新增 [Swift 原生 macOS 版](macos/README.md)，接入已有键盘的灯光、性能、三层映射、宏、配置库、USB/2.4G 与音频 HID 功能；真实 K87 2.4G 已通过双次完整读取和亮度、休眠、单键的修改/恢复。代码与实机验收范围见 [macOS 验证记录](macos/VALIDATION.md)。继续开发时请先阅读 [macOS 移植说明](docs/MACOS_PORT.md)。
 
-## 本次更新
+## macOS 使用
+
+完整步骤见 [macOS 使用说明](macos/README.md)。需要 macOS 14 或更新版本；当前实测环境为 Apple Silicon / macOS 27.2，其他系统和架构尚待验证。
+
+从 [macOS Actions 构建](https://github.com/wzk112/MchoseHub/actions/workflows/macos.yml)中选择成功的运行，下载对应架构的 artifact，解开其中的安装包 ZIP，再将 `MCHOSE HUB.app` 拖到“应用程序”。这是本地 ad-hoc 签名的开发包，尚未做 Developer ID 签名或公证；不要求安装 .NET。也可用 Xcode 提供的 Swift 6 从源码构建：
+
+```sh
+git clone https://github.com/wzk112/MchoseHub.git
+cd MchoseHub/macos
+swift test -Xswiftc -warnings-as-errors
+bash build-app.sh ../artifacts/macos
+```
+
+首次读取真实设备前，在“系统设置 → 隐私与安全性 → 输入监控”中允许已安装的 MCHOSE HUB，然后退出重开。未授权时仍可使用独立预览、本地配置和宏编辑。左侧选择 USB 或 2.4G 接口，读取完整配置后编辑草稿，点击“应用当前草稿到设备”才会写入；恢复前会另存备份。宏库不包含在配置备份内。
+
+图标的可编辑源文件为 [AppIcon.svg](macos/Assets/AppIcon.svg)，打包脚本使用同源生成的 `.icns`。
+
+## Windows R2 更新
 
 - 左侧功能导航、中央键盘图、右侧灯效参数，设备状态集中显示。
 - 使用清晰的功能名称和操作说明，提供浅色和深色主题。
@@ -19,7 +38,7 @@ Windows 客户端使用原生 WinUI 3。仓库新增 [Swift 原生 macOS 版](ma
 - 完整配置恢复后重新读取并核对全部已解析配置字段；不一致时指出位置并停止，不自动再次恢复。
 - 读取或写入失败后，后续编辑会重新读取当前设备配置，避免旧数据覆盖已经生效的设置。
 
-## 使用
+## Windows 使用
 
 双击运行包中的 MchoseHub.exe。保留整个目录，不能只复制 exe。绿色包自带 .NET 8 和 Windows App SDK。
 
@@ -29,7 +48,7 @@ Windows 客户端使用原生 WinUI 3。仓库新增 [Swift 原生 macOS 版](ma
 
 配置：读取当前配置或导入文件，填写名称后保存到本地库。选中方案载入，再点击应用已载入配置。保存优先使用当前载入/导入内容；没有草稿时读取设备。只接受同型号配置。备份包含性能、灯光、逐键色和三层按键，不包含宏库，宏应另存。
 
-## 验证
+## Windows 验证
 
 64 项离线检查通过，覆盖配置校验、恢复、故障后的状态处理、宏录制边界和无线协议模拟。
 
@@ -53,7 +72,7 @@ R2 已在真实 K87 有线连接中验证界面重连与读取：常亮模式 1�
 
 音乐/GIF、云模板、固件升级、多设备灯光同步、程序关联切换尚未原生实现。本地配置库不代表 K87 有多个板载槽。宏上传只能验证首个目录项，完整事件仍需实机验证；有线上限 65535 字节，无线上限 3570 字节。
 
-## 构建
+## Windows 构建
 
 ```powershell
 dotnet build MchoseHub.sln -c Release -p:Platform="Any CPU" -p:EnableNETAnalyzers=true -p:TreatWarningsAsErrors=true
